@@ -11,8 +11,13 @@
 - **Krok 0 wykonany**: kod JEST w repo (commit „FretMaster v1 — przeniesienie
   projektu"). Nowy czat (2026-09-10) zweryfikował stan: pliki w repo,
   29/29 testów OK, drzewo robocze czyste.
-- Makieta UI v2: `makieta-v2.html` (layout nowych modułów; czeka na akceptację
-  użytkownika — drobne korekty możliwe).
+- Makieta UI v2: `makieta-v2.html` — **zaakceptowana przez użytkownika (2026-09-10)**.
+- **PWA (krok 1 planu) — pliki gotowe (2026-09-10)**: `manifest.webmanifest`,
+  `sw.js` (offline, cache-first dla zasobów, network-first dla nawigacji),
+  ikony `icons/` (192/512 + maskable + apple-touch + favicon; generator:
+  `tools/make-icons.sh`, ImageMagick, paleta z `:root`). Rejestracja SW tylko
+  przy https/localhost — **`file://` nadal działa normalnie** (wymóg z HANDOFF 5.5).
+  Testy po zmianach: 29/29 OK. **Zostało**: włączenie GitHub Pages + test na telefonie.
 
 ## Decyzje (zatwierdzone przez użytkownika)
 1. **Forma: A — PWA** (telefon/tablet/komputer, offline). Natywne (Electron/APK)
@@ -54,6 +59,12 @@
 4. **Layout `makieta-v2.html` zaakceptowany** — podążać za makieta przy budowie UI.
 
 ## Problemy / rozwiązania / pułapki
+- **PWA — smoke test**: test wyciąga **pierwszy** blok `<script>` — kod rejestracji
+  SW dodany jako **drugi, ostatni** blok na końcu `<body>` (testy go nie ruszają).
+- **PWA — ikony**: wybrana wersja rysowana skryptem (deterministyczna, paleta apki);
+  optymalizacja `-strip -depth 8` (16-bit dawał 5× większe pliki).
+- **PWA — aktualizacje apki wymagają podniesienia `CACHE_VERSION` w `sw.js`**
+  (format: data wydania) — inaczej użytkownicy mogą dostać starą wersję z cache.
 - **CAGED**: dwa pierwsze warianty danych miały błędy (3. struna w kształcie C;
   kotwice G/E o +7 zamiast +12 od progu toniki) → poprawione; reguła:
   kształtów CAGED NIE poprawiać „na oko" — zawsze weryfikacja testami.
