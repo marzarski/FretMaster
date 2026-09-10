@@ -45,11 +45,13 @@
    mikrofonu; z `file://` bywa blokowany) → etap 2 planu (priorytet).
 9. **Mikrofon wymaga https** — konsekwencja: Pages przed modułami mikrofonowymi.
 
-## Do potwierdzenia przez użytkownika (3 pytania z HANDOFF §7)
-- Dźwięk gitary: ulepszona synteza (rekomendacja) vs prawdziwe próbki CC0?
-- Głębokość Poradnika: średni z teorią (rekomendacja) / krótkie / pełny mini-kurs?
-- Metronom na limicie: trzymaj (rekomendacja) / stop+podsumowanie / restart?
-- + akceptacja layoutu z `makieta-v2.html`.
+## Do potwierdzenia przez użytkownika — WSZYSTKO POTWIERDZONE (2026-09-10)
+1. **Dźwięk gitary: ulepszona synteza** (harmoniki, rezonans pudła, tłumienie
+   struny, delikatne stereo). Próbki CC0 = plan B, jeśli synteza nie zadowoli.
+2. **Poradnik: średni poziom z teorią** (poradniki + teoria z przykładami +
+   gotowe rutyny ćwiczeń).
+3. **Metronom na limicie tempa: trzymaj max** (gra dalej w tempie maksymalnym).
+4. **Layout `makieta-v2.html` zaakceptowany** — podążać za makieta przy budowie UI.
 
 ## Problemy / rozwiązania / pułapki
 - **CAGED**: dwa pierwsze warianty danych miały błędy (3. struna w kształcie C;
