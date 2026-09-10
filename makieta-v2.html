@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FretMaster v2 — makieta</title>
+<style>
+:root{
+  --bg:#0e1013; --panel:#161a20; --panel2:#1d232c; --line:#2a323d;
+  --txt:#e8ecf1; --muted:#9aa7b4; --acc:#f0a832; --ok:#2ecc71; --bad:#e74c3c;
+  --prep:#4d96ff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px}
+header{display:flex;align-items:center;gap:12px;padding:12px 18px;background:linear-gradient(180deg,#171b21,#12151a);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.logo{font-size:19px;font-weight:800}
+.logo span{color:var(--acc)}
+.mock-tag{font-size:10px;color:#151006;background:var(--acc);padding:2px 8px;border-radius:6px;font-weight:800;margin-left:8px;vertical-align:middle}
+nav{display:flex;gap:5px;margin-left:auto;flex-wrap:wrap}
+.tab{background:transparent;border:1px solid transparent;color:var(--muted);padding:8px 11px;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600}
+.tab:hover{color:var(--txt)}
+.tab.active{background:var(--panel2);color:var(--txt);border-color:var(--line)}
+.mute-btn{border:1px solid var(--line);background:var(--panel2);color:var(--txt);border-radius:9px;padding:8px 12px;cursor:pointer;font-size:14px}
+.new{background:var(--acc);color:#151006;font-size:9px;font-weight:800;padding:1px 5px;border-radius:4px;font-style:normal;margin-left:5px;vertical-align:middle;letter-spacing:.4px}
+main{max-width:1120px;margin:0 auto;padding:16px 14px 50px}
+section{display:none}
+section.active{display:block}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+h2{font-size:13.5px;color:var(--acc);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+h3{font-size:13.5px;margin-bottom:8px}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+label.small{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px}
+input,select{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--txt);font-size:14px}
+input.num{width:74px;text-align:center}
+.btn{background:var(--panel2);border:1px solid var(--line);color:var(--txt);padding:9px 14px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:600}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:#151006}
+.btn.big{font-size:16px;padding:12px 28px}
+.hint{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.55}
+/* metronom */
+.bpm{font-size:46px;font-weight:800;color:var(--acc);line-height:1}
+.bpm small{font-size:14px;color:var(--muted);font-weight:600}
+.dots{display:flex;gap:14px;margin:18px 0 6px;flex-wrap:wrap}
+.dot{width:36px;height:36px;border-radius:50%;background:var(--panel2);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--muted);cursor:pointer}
+.dot.on{background:var(--acc);border-color:#fff;transform:scale(1.18);color:#151006}
+.dot.b1{border-color:var(--acc)}
+.dot.muted{opacity:.4;text-decoration:line-through}
+.modechip{border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:13.5px;color:var(--muted)}
+.modechip.active{border-color:var(--acc);color:var(--txt)}
+.flow{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.fstep{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:12.5px;font-weight:600}
+.fstep.prep{border-color:var(--prep);color:#bcd4ff}
+.fstep.bell{border-color:var(--acc);color:var(--acc);font-weight:800}
+.arrow{color:var(--muted);font-size:16px}
+.preset{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.preset .nm{font-weight:700;font-size:14px}
+.preset .ds{font-size:12px;color:var(--muted)}
+.preset .ord{display:flex;flex-direction:column;gap:2px}
+.preset .ord button{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:5px;font-size:10px;padding:1px 7px;cursor:pointer}
+.preset .right{margin-left:auto;display:flex;gap:6px}
+/* mikrofon */
+.targetbox{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:18px;text-align:center;margin:12px 0}
+.targetbox .note{font-size:58px;font-weight:800;color:var(--acc);line-height:1.1}
+.targetbox .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:800}
+.micstate{display:inline-flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);padding:8px 14px;border-radius:9px;font-weight:700;font-size:13.5px}
+.micstate .led{width:10px;height:10px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.feedback{font-size:30px;font-weight:800;text-align:center;padding:12px;margin-top:10px;border-radius:12px}
+.feedback.ok{color:var(--ok);background:rgba(46,204,113,.07);border:1px solid rgba(46,204,113,.35)}
+.feedback.wait{color:var(--muted);border:1px dashed var(--line)}
+.progbar{height:8px;background:var(--panel2);border-radius:5px;overflow:hidden;margin-top:10px}
+.progbar i{display:block;height:100%;background:var(--ok)}
+/* transpozycja */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.opt{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px}
+.opt.active{border-color:var(--acc)}
+.result{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:21px;font-weight:800;letter-spacing:2px;margin-top:10px}
+.result .d{font-size:13px;color:var(--muted);font-weight:600;letter-spacing:0}
+.slider{height:8px;background:var(--panel);border-radius:5px;position:relative;margin:16px 0 4px}
+.slider i{position:absolute;left:66%;top:-6px;width:5px;height:20px;background:var(--acc);border-radius:2px}
+.slider .lbls{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:8px}
+/* poradnik */
+.toc{display:grid;grid-template-columns:270px 1fr;gap:16px}
+.toc ul{list-style:none}
+.toc li{padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13.5px;color:var(--muted)}
+.toc li.on{background:var(--panel2);color:var(--txt);font-weight:700}
+.toc .grp{font-size:11px;color:var(--acc);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 4px}
+.art p{color:var(--muted);line-height:1.65;font-size:14px;margin-top:10px}
+table.ex{width:100%;border-collapse:collapse;font-size:13.5px}
+.ex td,.ex th{border-bottom:1px solid var(--line);padding:10px;text-align:left}
+.ex th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+footer{text-align:center;color:#5b6673;font-size:12px;padding:18px;line-height:1.6}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}.toc{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🎸 Fret<span>Master</span><span class="mock-tag">MAKIETA v2</span></div>
+  <nav>
+    <button class="tab active" data-t="metronom">🥁 Metronom</button>
+    <button class="tab" data-t="micnotes">🎤 Mikrofon: nuty<i class="new">NOWY</i></button>
+    <button class="tab" data-t="micear">👂 Mikrofon: słuch<i class="new">NOWY</i></button>
+    <button class="tab" data-t="transp">🔀 Transpozycja<i class="new">NOWY</i></button>
+    <button class="tab" data-t="poradnik">📖 Poradnik</button>
+    <button class="tab" data-t="v1">🎸 v1 (gryf / trening / statystyki)</button>
+  </nav>
+  <button class="mute-btn" title="Master-mute — nowy"><span id="muteIco">🔊</span><i class="new">NOWY</i></button>
+</header>
+
+<main>
+
+<!-- ================= METRONOM ================= -->
+<section id="t-metronom" class="active">
+  <div class="panel">
+    <h2>Metronom — tryb zwykły</h2>
+    <div class="row">
+      <div class="bpm">80<small> BPM</small></div>
+      <button class="btn primary big">▶ Start</button>
+      <div><label class="small">Metrum — uderzeń na takt</label><input class="num" value="4"></div>
+    </div>
+    <div class="dots">
+      <div class="dot on b1">1</div>
+      <div class="dot">2</div>
+      <div class="dot muted">3</div>
+      <div class="dot">4</div>
+    </div>
+    <p class="hint" style="margin-top:0">Klik w kropkę = <b>wyciszenie tego uderzenia</b> w taktach (działa w obu trybach) — np. w 7/4 możesz wyciszyć 5. uderzenie. Uderzenie 1. jest akcentowane. Kropki to podgląd bicia metronomu.</p>
+  </div>
+
+  <div class="panel">
+    <h2>Rampa — automatyczne podkręcanie tempa <i class="new">NOWY</i></h2>
+    <div class="row">
+      <button class="modechip">Zwykły</button>
+      <button class="modechip active">Rampa</button>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <div><label class="small">Tempo bazowe (= 100%)</label><input class="num" value="80"> <span style="color:var(--muted);font-size:12px">BPM</span></div>
+      <div><label class="small">Przyrost na krok</label><div class="row"><button class="modechip active">%</button><button class="modechip">BPM</button><input class="num" value="1"></div></div>
+      <div><label class="small">Takty treningowe (n)</label><input class="num" value="4"></div>
+      <div><label class="small">Takty przygotowawcze (p)</label><input class="num" value="4"></div>
+      <div><label class="small">Tempo maksymalne</label><input class="num" value="120"> <span style="color:var(--muted);font-size:12px">BPM</span></div>
+      <div><label class="small">Po osiągnięciu max</label><select><option>trzymaj tempo</option><option>stop + podsumowanie</option><option>restart od startu</option></select></div>
+    </div>
+    <div class="flow">
+      <div class="fstep">🎯 takty 1–4 @ 80.0</div><span class="arrow">→</span>
+      <div class="fstep prep">4 takty przygot. @ 80.8 · cichsza barwa</div><span class="arrow">→</span>
+      <div class="fstep bell">🔔 ostatni takt przygot.</div><span class="arrow">→</span>
+      <div class="fstep">🎯 takty 1–4 @ 80.8</div><span class="arrow">→</span>
+      <div class="fstep prep">takty przygot. @ 81.6…</div><span class="arrow">→</span>
+      <div class="fstep">… aż do 120</div>
+    </div>
+    <p class="hint">Przyrost liczy się <b>zawsze od temapa bazowego</b> (liniowo: 80.8, 81.6, 82.4…). Takty przygotowawcze grają już <b>nowym</b> tempem i mają inną barwę; ostatni z nich = charakterystyczny dzwonek = <b>start ćwiczenia</b>. Maska wyciszonych uderzeń działa przez całą rampę.</p>
+  </div>
+
+  <div class="panel">
+    <h2>Presety ćwiczeń <i class="new">NOWY</i></h2>
+    <div class="preset">
+      <div class="ord"><button>↑</button><button>↓</button></div>
+      <div><div class="nm">🎯 Przeloty 16tek</div><div class="ds">rampa 80→120 BPM · +1% · 4/4 · wyciszone uderzenia 2 i 4</div></div>
+      <div class="right"><button class="btn">załadować</button><button class="btn">🗑</button></div>
+    </div>
+    <div class="preset">
+      <div class="ord"><button>↑</button><button>↓</button></div>
+      <div><div class="nm">🐢 Start powolny</div><div class="ds">zwykły · 60 BPM · 3/4 · wyciszone 2.</div></div>
+      <div class="right"><button class="btn">załadować</button><button class="btn">🗑</button></div>
+    </div>
+    <div class="preset">
+      <div class="ord"><button>↑</button><button>↓</button></div>
+      <div><div class="nm">🎷 Nierówne</div><div class="ds">rampa 70→110 · 7/4 · wyciszone 5. · +1 BPM</div></div>
+      <div class="right"><button class="btn">załadować</button><button class="btn">🗑</button></div>
+    </div>
+    <button class="btn primary" style="margin-top:8px">＋ Zapisz bieżące ustawienia jako preset…</button>
+    <p class="hint">Kolejność listy zmieniasz wedle uznania (strzałki lub przeciąganie). Presety zapisują: tryb, metrum, maskę wyciszeń, BPM, przyrost, n, p, tempo max. Zapis trwały (localStorage).</p>
+  </div>
+</section>
+
+<!-- ================= MIKROFON: NUTY ================= -->
+<section id="t-micnotes">
+  <div class="panel">
+    <h2>🎤 Mikrofon: znajdź nutę <i class="new">NOWY</i></h2>
+    <p class="hint" style="margin-top:0">Aplikacja pokazuje nazwę nuty → grasz ją na gitarze → mikrofon sprawdza. Poprawnie = krótkie <b style="color:var(--ok)">OK</b> i następna nuta.</p>
+    <div class="targetbox">
+      <div class="lbl">Zagraj nutę:</div>
+      <div class="note">A</div>
+    </div>
+    <div class="row" style="justify-content:center;gap:12px">
+      <span class="micstate"><span class="led"></span>🎤 Mikrofon: aktywny</span>
+      <button class="btn">🎤 Test mikrofonu</button>
+    </div>
+    <div class="feedback ok">✓ OK</div>
+    <div class="row" style="justify-content:space-between;font-size:13px;color:var(--muted);margin-top:6px">
+      <span>12 / 20 nut</span><span>✓ 10 &nbsp;·&nbsp; ✕ 2 &nbsp;·&nbsp; 83% od pierwszej próby</span>
+    </div>
+    <div class="progbar"><i style="width:60%"></i></div>
+  </div>
+
+  <div class="panel">
+    <h2>Ustawienia sesji</h2>
+    <div class="row">
+      <div><label class="small">Testowane nuty</label><input class="num" value="20"></div>
+      <div><label class="small">Źródło nut</label><select><option>Wszystkie 12</option><option>Skala (np. pentatonika molowa)</option><option>Dźwięki akordu</option></select></div>
+      <div><label class="small">Zakres (progi)</label><select><option>1–12</option><option>1–15</option><option>Wszystkie</option></select></div>
+      <div><label class="small">Tolerancja</label><select><option>Normalna (±40 centów)</option><option>Surowa (±25)</option><option>Luźna (±60)</option></select></div>
+      <div><label class="small">Przy pomyłce <i class="new">NOWY</i></label><select><option>Powtórz tę samą nutę</option><option>Idź od razu do następnej</option></select></div>
+    </div>
+    <button class="btn primary big" style="margin-top:14px">▶ Start sesji (20 nut)</button>
+    <p class="hint">Przy pierwszym użyciu przeglądarka zapyta o zgodę na mikrofon. Najlepiej uruchamiać z adresu https (GitHub Pages) — z pliku lokalnego mikrofon bywa blokowany. „Test mikrofonu": grasz nutę, apka pokazuje, co wykryła (kalibracja przed sesją).</p>
+  </div>
+</section>
+
+<!-- ================= MIKROFON: SŁUCH ================= -->
+<section id="t-micear">
+  <div class="panel">
+    <h2>👂 Mikrofon: słuch <i class="new">NOWY</i></h2>
+    <p class="hint" style="margin-top:0">Aplikacja odtwarza dźwięk → grasz taki sam. Ćwiczy i <b>ucho</b>, i znajomość nut na gryfie.</p>
+    <div class="targetbox">
+      <div class="lbl">Krok 1 — posłuchaj</div>
+      <button class="btn primary big" style="margin-top:12px">▶ Odtwórz dźwięk</button>
+    </div>
+    <div class="targetbox" style="border-color:var(--acc)">
+      <div class="lbl">Krok 2 — zagraj ten sam dźwięk</div>
+      <div class="note" style="font-size:26px;color:var(--txt)">🎸 gram…</div>
+    </div>
+    <div class="row" style="justify-content:center;gap:12px">
+      <span class="micstate"><span class="led"></span>🎤 Mikrofon: aktywny</span>
+      <button class="btn">🎤 Test mikrofonu</button>
+    </div>
+    <div class="feedback wait">… nasłuchuję …</div>
+    <div class="row" style="justify-content:space-between;font-size:13px;color:var(--muted);margin-top:6px">
+      <span>7 / 30 nut</span><span>✓ 6 &nbsp;·&nbsp; ✕ 1 &nbsp;·&nbsp; 86% od pierwszej próby</span>
+    </div>
+    <div class="progbar"><i style="width:23%"></i></div>
+  </div>
+
+  <div class="panel">
+    <h2>Ustawienia sesji (wspólny silnik z modułem „znajdź nutę")</h2>
+    <div class="row">
+      <div><label class="small">Testowane nuty</label><input class="num" value="30"></div>
+      <div><label class="small">Źródło nut</label><select><option>Wszystkie 12</option><option>Skala</option><option>Dźwięki akordu</option></select></div>
+      <div><label class="small">Tolerancja</label><select><option>Normalna (±40 centów)</option><option>Surowa (±25)</option><option>Luźna (±60)</option></select></div>
+      <div><label class="small">Przy pomyłce <i class="new">NOWY</i></label><select><option>Powtórz tę samą nutę</option><option>Idź od razu do następnej</option></select></div>
+    </div>
+    <button class="btn primary big" style="margin-top:14px">▶ Start sesji (30 nut)</button>
+  </div>
+</section>
+
+<!-- ================= TRANSPOZYCJA ================= -->
+<section id="t-transp">
+  <div class="panel">
+    <h2>🔀 Transpozycja akordów <i class="new">NOWY</i></h2>
+    <div class="row">
+      <div style="flex:1;min-width:230px"><label class="small">Sekwencja akordów</label><input style="width:100%" value="C A D G"></div>
+      <div style="flex:1;min-width:230px"><label class="small">Do transpozycji (puste LUB jeden akord)</label><input style="width:100%" value="F"></div>
+    </div>
+    <div class="grid2">
+      <div class="opt">
+        <h3>Opcja A — pole <b>puste</b>: o półtony (góra/dół)</h3>
+        <div class="row" style="gap:10px;margin-top:4px">
+          <button class="btn">−</button>
+          <div style="font-size:26px;font-weight:800;min-width:56px;text-align:center">+3</div>
+          <button class="btn">＋</button>
+          <span style="color:var(--muted);font-size:12.5px">półtony<br>(−12 … +12)</span>
+        </div>
+        <div class="result" style="font-size:17px">C A D G <span class="d">→</span> D# C F A# <span class="d">(cała sekwencja +3)</span></div>
+      </div>
+      <div class="opt active">
+        <h3>Opcja B — wpisany <b>jeden akord</b>: sekwencja zaczyna się od niego</h3>
+        <div class="row" style="gap:10px;margin-top:4px">
+          <input value="F" style="width:90px">
+          <span style="color:var(--muted);font-size:12.5px">np. „F" — pierwszy akord sekwencji<br>staje się F (C→F = +5)</span>
+        </div>
+        <div class="result" style="font-size:17px">C A D G <span class="d">→</span> F D G Bb <span class="d">(transpozycja +5 pól)</span></div>
+        <div class="row" style="gap:8px;margin-top:10px">
+          <button class="btn">📋 Kopiuj wynik</button>
+          <button class="btn">🔊 Odsłuchaj akordy</button>
+        </div>
+      </div>
+    </div>
+    <p class="hint">Działają akordy z jakościami: <b>Cm D7 Bb9</b> — jakość zostaje, przesuwa się tonika. Nazwy międzynarodowe i polskie (H = B naturalny, B = Bb). Klik w akord w wyniku = odsłuchanie jego dźwięków.</p>
+  </div>
+</section>
+
+<!-- ================= PORADNIK ================= -->
+<section id="t-poradnik">
+  <div class="panel">
+    <h2>📖 Poradnik — samouczki + teoria</h2>
+    <div class="toc">
+      <ul>
+        <div class="grp">Podstawy</div>
+        <li>Gryf i nuty — mapowanie</li>
+        <li>Interwały: co to i po co</li>
+        <li>Skale i tryby</li>
+        <li>Dźwięki akordów (chord tones)</li>
+        <li class="on">System CAGED</li>
+        <div class="grp">Moduły aplikacji</div>
+        <li>Gryf (eksplorator) — jak używać</li>
+        <li>Trening: 4 tryby krok po kroku</li>
+        <li>Sprint — metoda i plan</li>
+        <li>Metronom i rampa tempa</li>
+        <li>🎤 Mikrofon: znajdź nutę</li>
+        <li>👂 Mikrofon: słuch</li>
+        <li>Transpozycja akordów</li>
+        <div class="grp">Ćwiczenie</div>
+        <li>Tempo: wolne → dokładne → szybkie</li>
+        <li>Rutyna: 10 minut dziennie</li>
+      </ul>
+      <div class="art">
+        <h3>System CAGED — w skrócie</h3>
+        <p>(podgląd artykułu) Pięć przenikalnych kształtów (C–A–G–E–D) pokrywa cały gryf.
+        Każda skala i każdy akord da się zagrać pięcioma różnymi „postaciami" — gdy znasz je
+        wszystkie, to sam motyw grasz w dowolnym miejscu gryfu. To dokładnie ta umiejętność,
+        dzięki której Slash przemieszcza się po szyje bez zatrzymywania w jednym „boksie".</p>
+        <p>Każdy artykuł ma strukturę: <b style="color:var(--txt)">co to jest</b> →
+        <b style="color:var(--txt)">po co ćwiczyć</b> → <b style="color:var(--txt)">jak ćwiczyć w aplikacji</b>
+        (konkretne tryby i ustawienia) → <b style="color:var(--txt)">częste błędy</b>.</p>
+        <p>Artykuły odwołują się do modułów aplikacji jednym kliknięciem (np. „otwórz eksplorator
+        w tonacji A minor z CAGED" → apka ustawia się sama).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= V1 ================= -->
+<section id="t-v1">
+  <div class="panel">
+    <h2>Wersja 1 — bez zmian layoutu</h2>
+    <table class="ex">
+      <tr><th>Zakładka</th><th>Stan</th></tr>
+      <tr><td>🎸 Gryf (eksplorator)</td><td>działa — skale, akordy, interwały, CAGED, strojenia, LH/RH, dźwięk, nazwy nut</td></tr>
+      <tr><td>🎯 Trening</td><td>działa — nazwij / znajdź / pamięć / sprint</td></tr>
+      <tr><td>📊 Statystyki</td><td>działa — trafność, serie, rekord sprintu, czas sesji</td></tr>
+      <tr><td>⚙️ Ustawienia</td><td>działa — instrument, strojenie, progi, struny, nazwy, trening</td></tr>
+    </table>
+    <p class="hint">Nowe moduły (metronom, 2× mikrofon, transpozycja, poradnik, master-mute) dokładane są
+    jako <b>osobne zakładki</b> — v1 nie jest ruszana. Działająca wersja: <b>index.html</b>.</p>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Makieta v2 — statyczna referencja layoutu FretMaster v2 (bez funkcjonalności).<br>
+  <span style="color:var(--acc);font-weight:700">NOWY</span> = element nowy względem v1 · działająca aplikacja: <b>index.html</b>
+</footer>
+
+<script>
+document.querySelectorAll('.tab').forEach(function(b){
+  b.onclick = function(){
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('active', x===b); });
+    document.querySelectorAll('main section').forEach(function(s){ s.classList.toggle('active', s.id==='t-'+b.dataset.t); });
+  };
+});
+document.querySelector('.mute-btn').onclick = function(){
+  this.querySelector('span').textContent = this.querySelector('span').textContent==='🔊' ? '🔇' : '🔊';
+};
+</script>
+</body>
+</html>
