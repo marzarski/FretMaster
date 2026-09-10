@@ -1,10 +1,22 @@
 # 🎸 FretMaster — Trener i eksplorator gryfu
 
-Samodzielna aplikacja webowa (jeden plik HTML, zero zależności, działa offline).
+Samodzielna aplikacja webowa (zero zależności, działa offline).
 Łączy najlepsze cechy: **Fretboard Trainer** (How to Sound Like Slash), **Fretmap**,
 **Guitar Fretboard Note Trainer** (Justin Guitar), **Fretwiz** i **FretPro**.
 
 Uruchomienie: otwórz `index.html` w przeglądarce (lub `python3 -m http.server`).
+
+## 📲 Instalacja jako aplikacja (PWA)
+Po opublikowaniu po **https** (np. GitHub Pages) apkę można zainstalować na telefonie,
+tablecie i komputerze (Android/Chrome: przycisk „Zainstaluj”; iPhone/Safari: Udostępnij →
+„Dodaj do ekranu głównego”). Zainstalowana działa **offline**.
+
+- pliki: `manifest.webmanifest`, `sw.js` (service worker), ikony w `icons/`,
+- po https/localhost service worker rejestruje się automatycznie; otwarta z `file://`
+  apka działa normalnie, tylko bez offline i bez instalacji,
+- **aktualizacje (dla developera)**: przy istotnej zmianie aplikacji podnieś
+  `CACHE_VERSION` w `sw.js` — użytkownicy dostaną świeże pliki,
+- ikony generuje `tools/make-icons.sh` (ImageMagick, paleta zgodna z `:root` w `index.html`).
 
 ## 🎸 Gryf (eksplorator)
 - Interaktywny gryf: kliknij dowolną nutę → usłyszysz ją (syntez „struny" Karplus-Strong) i zobaczysz nazwę + interwał,
