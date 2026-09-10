@@ -8,7 +8,9 @@
   (cała apka, ~52 KB), `smoke-test.js`, `README.md`.
 - Dane CAGED **zweryfikowane matematycznie** (2340 kombinacji, 0 błędów) —
   nie ruszać bez testów.
-- Kod jeszcze NIE jest w repo — trwa przeniesienie (krok 0 planu).
+- **Krok 0 wykonany**: kod JEST w repo (commit „FretMaster v1 — przeniesienie
+  projektu"). Nowy czat (2026-09-10) zweryfikował stan: pliki w repo,
+  29/29 testów OK, drzewo robocze czyste.
 - Makieta UI v2: `makieta-v2.html` (layout nowych modułów; czeka na akceptację
   użytkownika — drobne korekty możliwe).
 
@@ -67,7 +69,7 @@
   zamrażanie renderera.
 
 ## TODO (plan — pełna wersja: HANDOFF §6)
-- [ ] 0. Przeniesienie: repo `fretmaster` + wgranie v1 + PROGRESS.md + makieta
+- [x] 0. Przeniesienie: repo `fretmaster` + wgranie v1 + PROGRESS.md + makieta ✓
 - [ ] 1. PWA: manifest, ikony, **GitHub Pages**, test na telefonie (priorytet!)
 - [ ] 2. Master-mute
 - [ ] 3. Lepszy dźwięk gitary (wg decyzji)
