@@ -8,9 +8,16 @@
   (cała apka, ~52 KB), `smoke-test.js`, `README.md`.
 - Dane CAGED **zweryfikowane matematycznie** (2340 kombinacji, 0 błędów) —
   nie ruszać bez testów.
-- Kod jeszcze NIE jest w repo — trwa przeniesienie (krok 0 planu).
-- Makieta UI v2: `makieta-v2.html` (layout nowych modułów; czeka na akceptację
-  użytkownika — drobne korekty możliwe).
+- **Krok 0 wykonany**: kod JEST w repo (commit „FretMaster v1 — przeniesienie
+  projektu"). Nowy czat (2026-09-10) zweryfikował stan: pliki w repo,
+  29/29 testów OK, drzewo robocze czyste.
+- Makieta UI v2: `makieta-v2.html` — **zaakceptowana przez użytkownika (2026-09-10)**.
+- **PWA (krok 1 planu) — pliki gotowe (2026-09-10)**: `manifest.webmanifest`,
+  `sw.js` (offline, cache-first dla zasobów, network-first dla nawigacji),
+  ikony `icons/` (192/512 + maskable + apple-touch + favicon; generator:
+  `tools/make-icons.sh`, ImageMagick, paleta z `:root`). Rejestracja SW tylko
+  przy https/localhost — **`file://` nadal działa normalnie** (wymóg z HANDOFF 5.5).
+  Testy po zmianach: 29/29 OK. **Zostało**: włączenie GitHub Pages + test na telefonie.
 
 ## Decyzje (zatwierdzone przez użytkownika)
 1. **Forma: A — PWA** (telefon/tablet/komputer, offline). Natywne (Electron/APK)
@@ -43,13 +50,21 @@
    mikrofonu; z `file://` bywa blokowany) → etap 2 planu (priorytet).
 9. **Mikrofon wymaga https** — konsekwencja: Pages przed modułami mikrofonowymi.
 
-## Do potwierdzenia przez użytkownika (3 pytania z HANDOFF §7)
-- Dźwięk gitary: ulepszona synteza (rekomendacja) vs prawdziwe próbki CC0?
-- Głębokość Poradnika: średni z teorią (rekomendacja) / krótkie / pełny mini-kurs?
-- Metronom na limicie: trzymaj (rekomendacja) / stop+podsumowanie / restart?
-- + akceptacja layoutu z `makieta-v2.html`.
+## Do potwierdzenia przez użytkownika — WSZYSTKO POTWIERDZONE (2026-09-10)
+1. **Dźwięk gitary: ulepszona synteza** (harmoniki, rezonans pudła, tłumienie
+   struny, delikatne stereo). Próbki CC0 = plan B, jeśli synteza nie zadowoli.
+2. **Poradnik: średni poziom z teorią** (poradniki + teoria z przykładami +
+   gotowe rutyny ćwiczeń).
+3. **Metronom na limicie tempa: trzymaj max** (gra dalej w tempie maksymalnym).
+4. **Layout `makieta-v2.html` zaakceptowany** — podążać za makieta przy budowie UI.
 
 ## Problemy / rozwiązania / pułapki
+- **PWA — smoke test**: test wyciąga **pierwszy** blok `<script>` — kod rejestracji
+  SW dodany jako **drugi, ostatni** blok na końcu `<body>` (testy go nie ruszają).
+- **PWA — ikony**: wybrana wersja rysowana skryptem (deterministyczna, paleta apki);
+  optymalizacja `-strip -depth 8` (16-bit dawał 5× większe pliki).
+- **PWA — aktualizacje apki wymagają podniesienia `CACHE_VERSION` w `sw.js`**
+  (format: data wydania) — inaczej użytkownicy mogą dostać starą wersję z cache.
 - **CAGED**: dwa pierwsze warianty danych miały błędy (3. struna w kształcie C;
   kotwice G/E o +7 zamiast +12 od progu toniki) → poprawione; reguła:
   kształtów CAGED NIE poprawiać „na oko" — zawsze weryfikacja testami.
@@ -67,7 +82,7 @@
   zamrażanie renderera.
 
 ## TODO (plan — pełna wersja: HANDOFF §6)
-- [ ] 0. Przeniesienie: repo `fretmaster` + wgranie v1 + PROGRESS.md + makieta
+- [x] 0. Przeniesienie: repo `fretmaster` + wgranie v1 + PROGRESS.md + makieta ✓
 - [ ] 1. PWA: manifest, ikony, **GitHub Pages**, test na telefonie (priorytet!)
 - [ ] 2. Master-mute
 - [ ] 3. Lepszy dźwięk gitary (wg decyzji)

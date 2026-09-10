@@ -2,8 +2,17 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FretMaster — Trener i eksplorator gryfu</title>
+<meta name="description" content="FretMaster — trener i eksplorator gryfu gitary i basu: nuty, skale, akordy, system CAGED, treningi.">
+<meta name="theme-color" content="#12151a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FretMaster">
 <style>
 :root{
   --bg:#0e1013; --panel:#161a20; --panel2:#1d232c; --line:#2a323d;
@@ -1148,6 +1157,16 @@ buildLegend();
 renderTrainerBoard();
 renderTrainerView();
 renderStats();
+</script>
+<script>
+/* PWA: rejestracja service workera — TYLKO po https lub localhost
+   (GitHub Pages / serwer deweloperski). Otwarta z file:// apka działa
+   normalnie, tylko bez offline i bez możliwości instalacji. */
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('./sw.js').catch(function () { /* brak SW = brak offline; apka i tak działa */ });
+  });
+}
 </script>
 </body>
 </html>
