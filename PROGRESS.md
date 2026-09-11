@@ -26,8 +26,12 @@
   NIE po każdej zmianie. Testy na żywo w podglądzie w czacie (dźwięki apki
   działają; mikrofon w podglądzie może być zablokowany przez iframe — wtedy
   test mikrofonu robimy na wersji scalonej na Pages).
-- **W robocie (bieżąca paczka)**: master-mute (zrobiony) + lepszy dźwięk gitary
-  (HANDOFF §5.3). PR #2 = zbiorczy PR paczki — NIE scalać przed końcem.
+- **W robocie (bieżąca paczka, PR #2 — NIE scalać przed końcem)**:
+  - [x] master-mute (przycisk w nagłówku, 37/37 testów)
+  - [x] usunięcie stopki z aplikacji (2026-09-11, na prośbę użytkownika)
+  - [x] białe nazwy trybów treningu (2026-09-11: `button{color:inherit}` +
+    jawny kolor `.mode-card .t`; przyczyna: <button> nie dziedziczy koloru)
+  - [ ] lepszy dźwięk gitary (HANDOFF §5.3) — następny w paczce
 - **Krok 2 master-mute ZROBIONY (2026-09-11)**: przycisk 🔊/🔇 w nagłówku
   (po prawej od zakładek, jak w makiecie); flaga `settings.muted` (domyślnie
   false) zapisywana w localStorage; helper `soundOn()` (= sound && !muted)
@@ -98,7 +102,9 @@
   zamrażanie renderera.
 
 ## Błędy z testów na żywo (podgląd w czacie)
-- (wpisywać tu: data, co nie działa, status; po naprawie dopisać rozwiązanie)
+- 2026-09-11, mute: użytkownik widzi przycisk, ikona zmienia się 🔊/🔇 (tak),
+  dźwięki apki słychać (tak). Weryfikacja wyciszenia: kliknąć 🔇, potem nutę
+  na gryfie — ma być cisza. Status: czeka na test użytkownika.
 
 - **Pułapka: równoległe edycje tego samego pliku** — kilka wywołań edit_file
   do jednego pliku w jednym bloku nadpisuje się (zapisuje się tylko jedna).
