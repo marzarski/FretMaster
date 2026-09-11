@@ -40,7 +40,10 @@
     title; nazwy zdradzałyby odpowiedź)
   - [x] metronom: tryb zwykły (2026-09-11): BPM 20–300, metrum 2–16, kropki
     z mutowaniem, akcent na 1, scheduler lookahead (25 ms / 150 ms), gra w tle
-    zakładek (migotanie), zapis w localStorage; testy → 77 OK
+    zakładek (migotanie), zapis w localStorage
+  - [x] metronom: rampa (2026-09-11): n/p, drewno + dzwonek, przyrost liniowy
+    od bazy (%/BPM), max (hold/stop/restart), wizualizacja przebiegu, fazy
+    kropek; czysta maszynka faz (metroRampNext) → testy 99 OK
   - [x] lepszy dźwięk gitary (HANDOFF §5.3, 2026-09-11): poprawny KS,
     rezonans pudła, stereo, kompresor; 8 testów DSP (37→45 OK).
     Iteracja 2 (feedback: bardziej gitarowo, góra cichsza, dłużej): drugi
@@ -120,6 +123,9 @@
   wadliwy człon `(d[i-N]+d[(i-1)%N])*0.5` — stąd „chuda” barwa v1.
 - **CACHE_VERSION**: w trakcie paczki (przed scaleniem) NIE podbijamy co
   commit — wystarczy, że różni się od wersji na Pages (2026-09-10).
+- **Rampa: tempa zaokrąglane do 0.1** (`metroRampTempo`) — inaczej float daje
+  80.80000001; fazy liczone na granicach taktów (`metroOnBar`), a dźwięki
+  planowane na granicy uderzeń (lookahead) — dwa poziomy planowania.
 
 ## Błędy z testów na żywo (podgląd w czacie)
 - 2026-09-11, mute: użytkownik widzi przycisk, ikona zmienia się 🔊/🔇 (tak),
@@ -153,7 +159,7 @@
 - [x] 1. PWA: manifest, ikony, **GitHub Pages** ✓ (działa: marzarski.github.io/FretMaster/)
 - [x] 2. Master-mute ✓
 - [x] 3. Lepszy dźwięk gitary ✓ (zaakceptowany przez użytkownika)
-- [ ] 4. Metronom: zwykły ✓ (2026-09-11) → rampa → presety
+- [ ] 4. Metronom: zwykły ✓ → rampa ✓ (2026-09-11) → presety
 - [ ] 5. Mikrofon: silnik pitch + „Test mikrofonu" → „znajdź nutę" → „słuch"
 - [ ] 5b. 🎚️ Tuner do strojenia gitary (pomysł użytkownika 2026-09-11 —
   po silniku pitch z kroku 5; spec: PROGRESS „Tuner — spec”)
