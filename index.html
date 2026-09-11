@@ -128,6 +128,20 @@ th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4p
 .pbar{height:8px;background:var(--panel2);border-radius:5px;overflow:hidden;min-width:80px}
 .pbar i{display:block;height:100%;background:var(--ok);border-radius:5px}
 .hint{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+/* metronom */
+.tab-btn.live{border-color:var(--acc);color:var(--acc);animation:tblink 1.2s ease-in-out infinite}
+@keyframes tblink{0%,100%{opacity:1}50%{opacity:.45}}
+.mbpm{font-size:44px;font-weight:800;color:var(--acc);line-height:1;min-width:150px}
+.mbpm small{font-size:14px;color:var(--muted);font-weight:600}
+input.num{width:74px;text-align:center;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--txt);font-size:14px}
+input.num:focus{outline:2px solid var(--acc);outline-offset:1px}
+.btn.big{font-size:16px;padding:12px 28px}
+.mdots{display:flex;gap:12px;margin:16px 0 6px;flex-wrap:wrap}
+.mdot{width:38px;height:38px;border-radius:50%;background:var(--panel2);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer;user-select:none}
+.mdot.on{background:var(--acc);border-color:#fff;transform:scale(1.18);color:#151006}
+.mdot.b1{border-color:var(--acc)}
+.mdot.mut{opacity:.4;text-decoration:line-through}
+.mbar{font-size:22px;font-weight:800;min-width:60px}
 @media (max-width:640px){ .qtext{font-size:17px} .qtext .big{font-size:22px} .pad{grid-template-columns:repeat(4,1fr)} }
 </style>
 </head>
@@ -140,6 +154,7 @@ th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4p
   <nav>
     <button class="tab-btn active" data-tab="board">🎸 Gryf</button>
     <button class="tab-btn" data-tab="train">🎯 Trening</button>
+    <button class="tab-btn" data-tab="metro">🥁 Metronom</button>
     <button class="tab-btn" data-tab="stats">📊 Statystyki</button>
     <button class="tab-btn" data-tab="settings">⚙️ Ustawienia</button>
   </nav>
@@ -205,6 +220,35 @@ th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4p
     <div class="board-scroll" id="trainBoardScroll"></div>
     <div class="pad hide" id="pad"></div>
     <div class="typeline" id="typeLine">Wskazówka: możesz też pisać nazwę nuty na klawiaturze (np. „C”, „C#”, „Ab” albo „Cis”, „H”). <b id="typeBuf"></b></div>
+  </div>
+</section>
+
+<!-- ============ METRONOM ============ -->
+<section id="tab-metro">
+  <div class="panel">
+    <h2>Metronom — tryb zwykły</h2>
+    <div class="row">
+      <div class="mbpm" id="metroBpmDisp">80<small> BPM</small></div>
+      <button class="btn primary big" id="metroStart">▶ Start</button>
+      <div>
+        <label class="small">Tempo (BPM)</label>
+        <div class="row" style="gap:6px">
+          <button class="btn" id="metroMinus">−</button>
+          <input class="num" id="metroBpm" value="80" inputmode="numeric" autocomplete="off">
+          <button class="btn" id="metroPlus">+</button>
+        </div>
+      </div>
+      <div>
+        <label class="small">Metrum — uderzeń na takt</label>
+        <input class="num" id="metroBeats" value="4" inputmode="numeric" autocomplete="off">
+      </div>
+      <div>
+        <label class="small">Takt</label>
+        <div class="mbar" id="metroBar">—</div>
+      </div>
+    </div>
+    <div class="mdots" id="metroDots"></div>
+    <p class="hint">Klik w kropkę = <b>wyciszenie tego uderzenia</b> w taktach — np. w 7/4 możesz wyciszyć 5. uderzenie. Uderzenie 1. jest akcentowane. Metronom gra dalej po przejściu do innych zakładek (miga w nagłówku) — zatrzymasz go tutaj.</p>
   </div>
 </section>
 
@@ -398,10 +442,16 @@ const DEFAULT_STATS = {
   global:{q:0,c:0,bestStreak:0,sprintBest:0},
   modes:{nazwij:{q:0,c:0,bs:0}, znajdz:{q:0,c:0,bs:0}, pamiec:{q:0,c:0,bs:0}, sprint:{q:0,c:0,bs:0}},
 };
+const DEFAULT_METRO = {
+  bpm:80, beats:4, mask:[],
+  mode:'simple', base:80, stepType:'pct', step:1, n:4, p:4, maxBpm:120, endMode:'hold',
+  presets:[],
+};
 let state = {
   settings: Object.assign({}, DEFAULT_SETTINGS),
   explorer: {key:0, scale:'major', chord:'none', show:{scale:true, chord:false, intervals:false, caged:false}, cagedHidden:[]},
   stats: JSON.parse(JSON.stringify(DEFAULT_STATS)),
+  metro: JSON.parse(JSON.stringify(DEFAULT_METRO)),
 };
 let currentTab = 'board';
 const TrainState = {mode:'nazwij', Q:null, phase:'idle',
@@ -440,10 +490,11 @@ function loadState(){
         state.stats.modes[m] = Object.assign({}, DEFAULT_STATS.modes[m], (d.stats.modes||{})[m]||{});
       });
     }
+    if(d.metro){ state.metro = Object.assign({}, DEFAULT_METRO, d.metro); metroNormalize(); }
   }catch(e){ console.warn('loadState', e); }
 }
 function saveState(){
-  try{ localStorage.setItem('fretmaster.v1', JSON.stringify({settings:state.settings, explorer:state.explorer, stats:state.stats})); }
+  try{ localStorage.setItem('fretmaster.v1', JSON.stringify({settings:state.settings, explorer:state.explorer, stats:state.stats, metro:state.metro})); }
   catch(e){ /* tryb prywatny — pomijamy */ }
 }
 
@@ -1215,6 +1266,109 @@ function syncExplorerChecks(){
   } else { $('chkCagedWrap').style.opacity=1; $('chkCaged').disabled=false; }
 }
 
+/* ================= METRONOM ================= */
+const Metro = {playing:false, beat:0, bar:1, nextTime:0, timer:null};
+function metroNormalize(){
+  const m = state.metro;
+  m.bpm = Math.min(300, Math.max(20, Math.round(+m.bpm)||80));
+  m.beats = Math.min(16, Math.max(2, Math.round(+m.beats)||4));
+  if(!Array.isArray(m.mask)) m.mask=[];
+  while(m.mask.length<m.beats) m.mask.push(false);
+  m.mask.length = m.beats;
+  if(!Array.isArray(m.presets)) m.presets=[];
+}
+function metroMuted(i){ return !!state.metro.mask[i]; }
+function metroTabBtn(){
+  const bs = document.querySelectorAll('.tab-btn');
+  for(let i=0;i<bs.length;i++) if(bs[i].dataset && bs[i].dataset.tab==='metro') return bs[i];
+  return null;
+}
+function metroClick(accent, t){
+  try{
+    const ac = AC || audio();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type='sine';
+    o.frequency.value = accent?1900:1350;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(accent?0.5:0.32, t+0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+0.055);
+    o.connect(g); g.connect(masterGain);
+    o.start(t); o.stop(t+0.07);
+  }catch(e){}
+}
+function metroTick(){
+  if(!Metro.playing || !AC) return;
+  if(Metro.nextTime < AC.currentTime - 0.25) Metro.nextTime = AC.currentTime + 0.05; // resync po uśpieniu karty
+  if(Metro.beat>=state.metro.beats){ Metro.beat=0; Metro.bar++; }
+  while(Metro.nextTime < AC.currentTime + 0.15){
+    const bi = Metro.beat, t = Metro.nextTime;
+    if(!metroMuted(bi) && soundOn()) metroClick(bi===0, t);
+    const delay = Math.max(0, (t-AC.currentTime)*1000);
+    setTimeout((b=>()=>{ if(Metro.playing) metroFlash(b); })(bi), delay);
+    Metro.nextTime += 60/state.metro.bpm;
+    Metro.beat++;
+    if(Metro.beat>=state.metro.beats){ Metro.beat=0; Metro.bar++; }
+  }
+}
+function metroStart(){
+  if(typeof window==='undefined' || (!window.AudioContext && !window.webkitAudioContext)) return false;
+  const ac = audio();
+  Metro.playing=true; Metro.beat=0; Metro.bar=1;
+  Metro.nextTime=ac.currentTime+0.08;
+  if(Metro.timer) clearInterval(Metro.timer);
+  Metro.timer=setInterval(metroTick,25);
+  metroFlash(-1); metroBarUI();
+  $('metroStart').textContent='⏹ Stop';
+  const tb=metroTabBtn(); if(tb) tb.classList.add('live');
+  return true;
+}
+function metroStop(){
+  Metro.playing=false;
+  if(Metro.timer){ clearInterval(Metro.timer); Metro.timer=null; }
+  metroFlash(-1);
+  $('metroBar').textContent='—';
+  $('metroStart').textContent='▶ Start';
+  const tb=metroTabBtn(); if(tb) tb.classList.remove('live');
+}
+function metroFlash(i){
+  const w=$('metroDots'); if(!w) return;
+  for(let k=0;k<w.children.length;k++) w.children[k].classList.toggle('on', k===i);
+  metroBarUI();
+}
+function metroBarUI(){ const b=$('metroBar'); if(b) b.textContent = Metro.playing? String(Metro.bar) : '—'; }
+function buildMetroDots(){
+  const w=$('metroDots'); if(!w) return;
+  w.innerHTML='';
+  for(let i=0;i<state.metro.beats;i++){
+    const d=el('div','mdot'+(i===0?' b1':'')+(metroMuted(i)?' mut':''));
+    d.textContent=i+1;
+    d.title = metroMuted(i) ? 'Uderzenie '+(i+1)+' wyciszone — kliknij, aby włączyć' : 'Uderzenie '+(i+1)+' — kliknij, aby wyciszyć';
+    d.onclick=(()=>{ const ix=i; return ()=>{ state.metro.mask[ix]=!state.metro.mask[ix]; saveState(); buildMetroDots(); }; })();
+    w.appendChild(d);
+  }
+}
+function buildMetroUI(){
+  metroNormalize();
+  const m=state.metro;
+  $('metroBpmDisp').innerHTML=m.bpm+'<small> BPM</small>';
+  $('metroBpm').value=m.bpm;
+  $('metroBeats').value=m.beats;
+  $('metroStart').textContent = Metro.playing?'⏹ Stop':'▶ Start';
+  buildMetroDots();
+  metroBarUI();
+}
+function bindMetro(){
+  $('metroStart').onclick=()=>{ Metro.playing?metroStop():metroStart(); };
+  const setBpm=v=>{ v=Math.min(300,Math.max(20,Math.round(+v)||state.metro.bpm)); state.metro.bpm=v; saveState(); buildMetroUI(); };
+  $('metroBpm').onchange=e=>setBpm(e.target.value);
+  $('metroMinus').onclick=()=>setBpm(state.metro.bpm-1);
+  $('metroPlus').onclick=()=>setBpm(state.metro.bpm+1);
+  $('metroBeats').onchange=e=>{
+    const v=Math.min(16,Math.max(2,Math.round(+e.target.value)||state.metro.beats));
+    state.metro.beats=v; metroNormalize(); saveState(); buildMetroUI();
+  };
+}
+
 /* ================= ZAKŁADKI ================= */
 document.querySelectorAll('.tab-btn').forEach(b=>{
   b.onclick = ()=>{
@@ -1223,6 +1377,7 @@ document.querySelectorAll('.tab-btn').forEach(b=>{
     document.querySelectorAll('main section').forEach(s=>s.classList.toggle('active', s.id==='tab-'+currentTab));
     if(currentTab==='board'){ syncExplorerChecks(); refreshBoard(); }
     if(currentTab==='train'){ renderTrainerBoard(); buildModeRow(); renderTrainerView(); }
+    if(currentTab==='metro'){ buildMetroUI(); }
     if(currentTab==='stats'){ renderStats(); }
     if(currentTab==='settings'){ buildSettings(); }
   };
@@ -1242,6 +1397,8 @@ buildKeyRow();
 buildSelects();
 buildPad();
 bindSettings();
+bindMetro();
+buildMetroUI();
 updateMuteBtn();
 syncExplorerChecks();
 buildModeRow();

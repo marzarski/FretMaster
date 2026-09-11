@@ -5,7 +5,7 @@ const path = require('path');
 const html = fs.readFileSync(path.join(__dirname, 'index.html'),'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 // eksport dla testów (nie zmienia zachowania aplikacji)
-script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn,ksString,addEarlyRef,applyFades,startQuestionAt,addTrainerDot};';
+script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn,ksString,addEarlyRef,applyFades,startQuestionAt,addTrainerDot,Metro,metroNormalize,metroMuted,metroStart,metroStop,metroFlash,buildMetroUI,buildMetroDots,bindMetro};';
 
 class EL {
   constructor(tag){ this.tagName=(tag||'div').toUpperCase(); this.children=[]; this.style={}; this.dataset={};
@@ -48,7 +48,8 @@ function reg(id, tag){ const e=new EL(tag||'div'); e.id=id; byId[id]=e; return e
 ['keyRow','selScale','selChord','chkScale','chkChord','chkIntervals','chkCaged','chkCagedWrap','boardScroll','legend','boardInfo',
  'modeRow','qText','qSub','qPlay','startBtn','skipBtn','timeBar','tStats','trainBoardScroll','pad','typeBuf','typeLine',
  'sprintOverlay','sprintScore','sprintBestLine','sprintAgain','sprintClose','statGrid','statTable','sesLine','btnResetStats',
- 'selInstrument','selTuning','selFrets','selLh','stringRow','selTrainFrets','selTrainSource','selLimit','chkSound','chkNames','selLang','btnMute']
+ 'selInstrument','selTuning','selFrets','selLh','stringRow','selTrainFrets','selTrainSource','selLimit','chkSound','chkNames','selLang','btnMute',
+ 'metroDots','metroBpmDisp','metroBpm','metroBeats','metroStart','metroMinus','metroPlus','metroBar']
  .forEach(id=>reg(id, id.startsWith('sel')?'select':(id.startsWith('chk')?'input':'div')));
 
 const body = new EL('body');
@@ -289,6 +290,39 @@ console.log('— synteza struny —');
   for(let i=0;i<r.length;i++){ rd+=Math.abs(r[i]-cpy[i]); const a=Math.abs(r[i]); if(a>pk) pk=a; }
   ok(rd>0 && pk<1.0, 'addEarlyRef: subtelne odbicie bez przesteru');
 }
+console.log('— metronom —');
+T.bindMetro(); T.buildMetroUI();
+ok(byId.metroDots.children.length===4, 'metronom: 4 kropki dla 4/4');
+ok(byId.metroDots.children[0]._cls.has('b1'), 'metronom: uderzenie 1. oznaczone (b1)');
+byId.metroDots.children[1].onclick();
+ok(state.metro.mask[1]===true, 'metronom: klik wycisza uderzenie');
+ok(byId.metroDots.children[1]._cls.has('mut'), 'metronom: wyciszona kropka oznaczona');
+byId.metroDots.children[1].onclick();
+ok(state.metro.mask[1]===false, 'metronom: ponowny klik odciszania');
+byId.metroBeats.value='7'; byId.metroBeats.onchange({target:byId.metroBeats});
+ok(state.metro.beats===7 && byId.metroDots.children.length===7, 'metronom: metrum 7 (7 kropek)');
+byId.metroBeats.value='99'; byId.metroBeats.onchange({target:byId.metroBeats});
+ok(state.metro.beats===16, 'metronom: metrum clamo do 16');
+byId.metroBeats.value='1'; byId.metroBeats.onchange({target:byId.metroBeats});
+ok(state.metro.beats===2, 'metronom: metrum clamo do 2');
+byId.metroBeats.value='4'; byId.metroBeats.onchange({target:byId.metroBeats});
+byId.metroBpm.value='120'; byId.metroBpm.onchange({target:byId.metroBpm});
+ok(state.metro.bpm===120 && byId.metroBpmDisp._html.includes('120'), 'metronom: zmiana BPM (120)');
+byId.metroPlus.onclick();
+ok(state.metro.bpm===121, 'metronom: stepper +');
+byId.metroMinus.onclick(); byId.metroMinus.onclick();
+ok(state.metro.bpm===119, 'metronom: stepper −');
+byId.metroBpm.value='80'; byId.metroBpm.onchange({target:byId.metroBpm});
+T.metroFlash(2);
+ok(byId.metroDots.children[2]._cls.has('on') && !byId.metroDots.children[0]._cls.has('on'), 'metronom: flash zapala właściwą kropkę');
+ok(T.metroStart()===false, 'metronom: bez AudioContext start zwraca false (stub)');
+ok(T.Metro.playing===false, 'metronom: nie gra w stubie');
+state.metro.mask[0]=true; T.saveState();
+ok(JSON.parse(localStorage.getItem('fretmaster.v1')).metro.mask[0]===true, 'metronom: maska zapisana');
+state.metro.mask[0]=false;
+localStorage.setItem('fretmaster.v1', JSON.stringify({settings:{}}));
+T.loadState();
+ok(state.metro.bpm===80 && state.metro.beats===4, 'metronom: stary zapis bez metro → domyślne');
 console.log('— persystencja —');
 T.saveState();
 const saved = JSON.parse(localStorage.getItem('fretmaster.v1'));

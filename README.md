@@ -41,9 +41,13 @@ Opcje treningu: zakres progów (1–12/1–15/wszystkie), źródło nut (wszystk
 limit czasu na pytanie, dźwięki włącz/wyłącz.
 Nazwy strun są w treningu ukryte (bez ściągi); puste struny klikalne jak zwykle (próg 0).
 
+## 🥁 Metronom (tryb zwykły)
+- Tempo 20–300 BPM, metrum do wpisania (2–16 uderzeń na takt), kropki = uderzenia (1. akcentowane),
+- klik w kropkę wycisza uderzenie (maska zapisywana); metronom gra dalej po zmianie zakładki (miga w nagłówku).
+
 ## 📊 Statystyki
 Trafność i rekordy serii per tryb, rekord sprintu, czas sesji — zapisywane lokalnie (localStorage).
 
 ## 🧪 Testy
-- `node smoke-test.js` — 61 testów smoke (init, CAGED + legenda, trening, sprint, eksplorator, puste struny, ustawienia, master-mute, synteza, persystencja),
+- `node smoke-test.js` — 77 testów smoke (init, CAGED + legenda, trening, sprint, eksplorator, puste struny, ustawienia, master-mute, synteza, metronom, persystencja),
 - poprawność kształtów CAGED weryfikowana: 2340 kombinacji (12 tonów × 5 kształtów × 3 długości gryfu) — 0 błędów.

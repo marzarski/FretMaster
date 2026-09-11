@@ -37,7 +37,10 @@
   - [x] klikalna legenda CAGED (2026-09-11): klik w kształt pokazuje/ukrywa go
     (`cagedHidden[]` w localStorage); kropki z wieloma literami aktualizowane
   - [x] ukryte nazwy strun w treningu (2026-09-11: pusty sname + neutralny
-    title; nazwy zdradzałyby odpowiedź); testy → 61 OK
+    title; nazwy zdradzałyby odpowiedź)
+  - [x] metronom: tryb zwykły (2026-09-11): BPM 20–300, metrum 2–16, kropki
+    z mutowaniem, akcent na 1, scheduler lookahead (25 ms / 150 ms), gra w tle
+    zakładek (migotanie), zapis w localStorage; testy → 77 OK
   - [x] lepszy dźwięk gitary (HANDOFF §5.3, 2026-09-11): poprawny KS,
     rezonans pudła, stereo, kompresor; 8 testów DSP (37→45 OK).
     Iteracja 2 (feedback: bardziej gitarowo, góra cichsza, dłużej): drugi
@@ -134,13 +137,26 @@
   `git reset --hard FETCH_HEAD`, nałożyć bieżące zmiany, commit, push.
   Dlatego: **push po każdej turze ze zmianami** (remote = prawda).
 
+## Tuner — spec (pomysł użytkownika 2026-09-11; budowa po kroku 5)
+- Strojenie gitary przez mikrofon telefonu/tabletu; **wspólny silnik
+  detekcji pitch** z modułami mikrofonowymi (5.6/5.7) — budujemy raz,
+  używamy w 3 miejscach.
+- Wizualizacja: poziomy pasek, **środek = idealnie nastrojone**; kolor od
+  odchyłki: czerwony → niebieski → **zielony (środek)** → niebieski →
+  czerwony (symetrycznie w obie strony).
+- Pokazuje: najbliższą nutę, odchyłkę w centach, kierunek (za nisko / za wysoko).
+- Start: tryb chromatyczny (dowolna nuta) + podpowiedź struny; wybór
+  konkretnej struny jako opcja (do decyzji przy budowie).
+
 ## TODO (plan — pełna wersja: HANDOFF §6)
 - [x] 0. Przeniesienie: repo `fretmaster` + wgranie v1 + PROGRESS.md + makieta ✓
 - [x] 1. PWA: manifest, ikony, **GitHub Pages** ✓ (działa: marzarski.github.io/FretMaster/)
 - [x] 2. Master-mute ✓
 - [x] 3. Lepszy dźwięk gitary ✓ (zaakceptowany przez użytkownika)
-- [ ] 4. Metronom: zwykły (metrum, kropki, mutowanie) → rampa → presety
+- [ ] 4. Metronom: zwykły ✓ (2026-09-11) → rampa → presety
 - [ ] 5. Mikrofon: silnik pitch + „Test mikrofonu" → „znajdź nutę" → „słuch"
+- [ ] 5b. 🎚️ Tuner do strojenia gitary (pomysł użytkownika 2026-09-11 —
+  po silniku pitch z kroku 5; spec: PROGRESS „Tuner — spec”)
 - [ ] 6. Transpozycja akordów
 - [ ] 7. Poradnik (samouczki + teoria, uwzględnia nowe moduły)
 - [ ] 8. Testy końcowe (smoke + ręcznie z użytkownikiem, na telefonie)
