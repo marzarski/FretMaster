@@ -18,8 +18,16 @@
   `tools/make-icons.sh`, ImageMagick, paleta z `:root`). Rejestracja SW tylko
   przy https/localhost — **`file://` nadal działa normalnie** (wymóg z HANDOFF 5.5).
   Testy po zmianach: 29/29 OK.
-- **Krok 1 ZAMKNIĘTY (2026-09-11)**: GitHub Pages działa pod
-  https://marzarski.github.io/FretMaster/ (potwierdzone przez użytkownika).
+- **Krok 1 ZAMKNIĘTY W CAŁOŚCI (2026-09-11)**: GitHub Pages DZIAŁA pod
+  https://marzarski.github.io/FretMaster/ — repo publiczne, PR #1 scalony,
+  apka zainstalowana na telefonie użytkownika.
+- **Rytm pracy (ustalony, obowiązuje)**: jedna sesja = jedna paczka kilku zmian;
+  scalamy dopiero po kilku iteracjach poprawek (jeden PR na końcu paczki),
+  NIE po każdej zmianie. Testy na żywo w podglądzie w czacie (dźwięki apki
+  działają; mikrofon w podglądzie może być zablokowany przez iframe — wtedy
+  test mikrofonu robimy na wersji scalonej na Pages).
+- **W robocie (bieżąca paczka)**: master-mute (zrobiony) + lepszy dźwięk gitary
+  (HANDOFF §5.3). PR #2 = zbiorczy PR paczki — NIE scalać przed końcem.
 - **Krok 2 master-mute ZROBIONY (2026-09-11)**: przycisk 🔊/🔇 w nagłówku
   (po prawej od zakładek, jak w makiecie); flaga `settings.muted` (domyślnie
   false) zapisywana w localStorage; helper `soundOn()` (= sound && !muted)
@@ -88,6 +96,9 @@
 - **PWA (znaną ograniczenia)**: iOS — dźwięk przy zablokowanym ekranie
   ograniczony; Android — mitygacja „cichą pętlą audio", jeśli testy pokażą
   zamrażanie renderera.
+
+## Błędy z testów na żywo (podgląd w czacie)
+- (wpisywać tu: data, co nie działa, status; po naprawie dopisać rozwiązanie)
 
 ## TODO (plan — pełna wersja: HANDOFF §6)
 - [x] 0. Przeniesienie: repo `fretmaster` + wgranie v1 + PROGRESS.md + makieta ✓
