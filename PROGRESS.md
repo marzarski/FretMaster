@@ -31,11 +31,16 @@
   - [x] usunięcie stopki z aplikacji (2026-09-11, na prośbę użytkownika)
   - [x] białe nazwy trybów treningu (2026-09-11: `button{color:inherit}` +
     jawny kolor `.mode-card .t`; przyczyna: <button> nie dziedziczy koloru)
+  - [x] puste struny (próg 0, 2026-09-11): klik na strunę przed siodełkiem
+    (eksplorator + trening: pytania, odpowiedzi, kropki); nazwy strun
+    podświetlane wg skali/akordu/CAGED; zakres treningu 0–N; testy → 59 OK
+  - [x] klikalna legenda CAGED (2026-09-11): klik w kształt pokazuje/ukrywa go
+    (`cagedHidden[]` w localStorage); kropki z wieloma literami aktualizowane
   - [x] lepszy dźwięk gitary (HANDOFF §5.3, 2026-09-11): poprawny KS,
     rezonans pudła, stereo, kompresor; 8 testów DSP (37→45 OK).
     Iteracja 2 (feedback: bardziej gitarowo, góra cichsza, dłużej): drugi
     rezonans 430 Hz +2 dB, trzask kostki 5 ms, T60 1.5+250/f, bufor 2 s,
-    S 0.38, lowpass 9.5 kHz + presence +2.5 dB, kompensacja góry do +25%.
+    S 0.38, lowpass 9.5 kHz + presence +2.5 dB, kompensacja góry do +25%. Dźwięk zaakceptowany przez użytkownika.
 - **Krok 2 master-mute ZROBIONY (2026-09-11)**: przycisk 🔊/🔇 w nagłówku
   (po prawej od zakładek, jak w makiecie); flaga `settings.muted` (domyślnie
   false) zapisywana w localStorage; helper `soundOn()` (= sound && !muted)

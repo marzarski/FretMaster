@@ -79,6 +79,10 @@ select:focus,button:focus{outline:2px solid var(--acc);outline-offset:1px}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
 .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--muted)}
 .legend .li{display:inline-flex;align-items:center;gap:6px}
+.hit-open:hover{background:rgba(240,168,50,.14)}
+.legend .li.clickable{cursor:pointer;border:1px solid var(--line);border-radius:7px;padding:2px 8px}
+.legend .li.clickable:hover{border-color:var(--acc)}
+.legend .li.off{opacity:.35;text-decoration:line-through}
 .sw{width:13px;height:13px;border-radius:50%;display:inline-block;border:1.5px solid rgba(255,255,255,.8)}
 .info-line{margin-top:10px;font-size:13.5px;color:var(--muted);min-height:20px}
 .info-line b{color:var(--txt)}
@@ -168,7 +172,7 @@ th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4p
         <label class="chip" id="chkCagedWrap"><input type="checkbox" id="chkCaged"> CAGED (5 kształtów)</label>
       </div>
     </div>
-    <div class="hint">Kliknij dowolną nutę (nawet pustą), aby ją usłyszeć. Zakres progów, strojenie i nazwy ustawisz w zakładce ⚙️ Ustawienia.</div>
+    <div class="hint">Kliknij dowolne pole (nawet bez kropki) albo nazwę struny przed siodełkiem (pusta struna), aby usłyszeć dźwięk. Zakres progów, strojenie i nazwy ustawisz w zakładce ⚙️ Ustawienia.</div>
   </div>
   <div class="panel">
     <div class="board-scroll" id="boardScroll"></div>
@@ -396,7 +400,7 @@ const DEFAULT_STATS = {
 };
 let state = {
   settings: Object.assign({}, DEFAULT_SETTINGS),
-  explorer: {key:0, scale:'major', chord:'none', show:{scale:true, chord:false, intervals:false, caged:false}},
+  explorer: {key:0, scale:'major', chord:'none', show:{scale:true, chord:false, intervals:false, caged:false}, cagedHidden:[]},
   stats: JSON.parse(JSON.stringify(DEFAULT_STATS)),
 };
 let currentTab = 'board';
@@ -429,6 +433,7 @@ function loadState(){
     const d = JSON.parse(raw);
     if(d.settings) state.settings = Object.assign({}, DEFAULT_SETTINGS, d.settings);
     if(d.explorer) state.explorer = Object.assign({}, state.explorer, d.explorer);
+    if(!Array.isArray(state.explorer.cagedHidden)) state.explorer.cagedHidden=[];
     if(d.stats){
       state.stats.global = Object.assign({}, DEFAULT_STATS.global, d.stats.global||{});
       Object.keys(DEFAULT_STATS.modes).forEach(m=>{
@@ -582,6 +587,10 @@ function renderBoard(containerId, decorative){
   outer.appendChild(fb);
 
   const dispOrder = state.settings.lh ? range(S) : range(S).reverse(); // indeks struny od góry
+  const dKey = state.explorer.key; // wspólne dla nazw strun i kropek (eksplorator)
+  const dSSet = (decorative && state.explorer.show.scale) ? pcSet(SCALES[state.explorer.scale].iv) : null;
+  const dCSet = (decorative && state.explorer.show.chord && state.explorer.chord!=='none') ? pcSet(CHORDS[state.explorer.chord].iv) : null;
+  const dCaged = (decorative && state.explorer.show.caged && cagedAvailable()) ? cagedData() : null;
   dispOrder.forEach((s,i)=>{
     const y = numH + i*rowH + rowH/2;
     const ln = el('div','sline');
@@ -590,6 +599,13 @@ function renderBoard(containerId, decorative){
     const nm = el('div','sname');
     nm.style.top=(numH+i*rowH)+'px'; nm.style.height=rowH+'px'; nm.style.width=labelW+'px';
     nm.textContent = midiName(base[s]);
+    if(decorative){ // czy pusta struna wchodzi w skalę/akord/CAGED?
+      const opc=((base[s]%12)+12)%12, orel=((opc-dKey+12)%12);
+      if(opc===dKey) nm.style.color='#ff5252';
+      else if(dCSet && dCSet.has(orel)) nm.style.color='#4fc3f7';
+      else if(dSSet && dSSet.has(orel)) nm.style.color='#e6e6e6';
+      if(dCaged && dCaged.get(s+':0')){ const L=dCaged.get(s+':0'); nm.textContent+=' '+L.join(''); nm.style.color=CAGED_COLORS[L[0]]; }
+    }
     outer.appendChild(nm);
   });
   const nut = el('div','nut');
@@ -615,14 +631,9 @@ function renderBoard(containerId, decorative){
   /* dekoracje (tylko eksplorator) */
   let cellInfo = {};
   if(decorative){
-    const key = state.explorer.key;
-    const scaleOn = state.explorer.show.scale;
-    const chordOn = state.explorer.show.chord && state.explorer.chord!=='none';
+    const key = dKey;
     const intOn = state.explorer.show.intervals;
-    const cagOn = state.explorer.show.caged && cagedAvailable();
-    const sSet = scaleOn ? pcSet(SCALES[state.explorer.scale].iv) : null;
-    const cSet = chordOn ? pcSet(CHORDS[state.explorer.chord].iv) : null;
-    const caged = cagOn ? cagedData() : null;
+    const sSet = dSSet, cSet = dCSet, caged = dCaged;
     for(let s=0;s<S;s++){
       if(!state.settings.stringsMask[s]) continue;
       for(let f=1;f<=N;f++){
@@ -665,9 +676,15 @@ function renderBoard(containerId, decorative){
     }
   }
 
-  /* pola klikalne */
+  /* pola klikalne (puste struny: klik na strunę przed siodełkiem = próg 0) */
   for(let s=0;s<S;s++){
     const i = dispOrder.indexOf(s);
+    const oh = el('div','hit hit-open');
+    oh.dataset.s=s; oh.dataset.f=0;
+    oh.style.left='0px'; oh.style.top=(numH+i*rowH)+'px';
+    oh.style.width=labelW+'px'; oh.style.height=rowH+'px';
+    oh.title='Pusta struna '+midiName(base[s])+' — kliknij, aby usłyszeć';
+    outer.appendChild(oh);
     for(let f=1;f<=N;f++){
       const h = el('div','hit');
       h.dataset.s=s; h.dataset.f=f;
@@ -697,12 +714,13 @@ function cagedData(){
   const map = new Map();
   CAGED.forEach(sh=>{
     if(sh.aStr>=S) return;
+    if(state.explorer.cagedHidden.includes(sh.letter)) return;
     const aF = anchors[sh.letter];
     Object.keys(sh.notes).forEach(sIdx=>{
       const s=+sIdx; if(s>=S) return;
       sh.notes[s].forEach(n=>{
         const off=n[0], f=aF+off;
-        if(f<1||f>N) return;
+        if(f<0||f>N) return;
         const arr = map.get(s+':'+f)||[];
         if(!arr.includes(sh.letter)) arr.push(sh.letter);
         map.set(s+':'+f,arr);
@@ -725,7 +743,8 @@ function addTrainerDot(s,f,cls,text){
   const d = el('div','dot '+cls);
   d.dataset.s=s; d.dataset.f=f;
   d.style.width=d.style.height=(dotR*2)+'px';
-  d.style.left=(GEO.labelW+(f-0.5)*GEO.cellW-dotR)+'px';
+  const cx = f===0 ? GEO.labelW-dotR-3 : GEO.labelW+(f-0.5)*GEO.cellW;
+  d.style.left=(cx-dotR)+'px';
   d.style.top=(GEO.numH+i*GEO.rowH+GEO.rowH/2-dotR)+'px';
   d.style.fontSize=Math.max(9,dotR*0.8)+'px';
   if(text) d.textContent=text;
@@ -762,6 +781,7 @@ function buildLegend(){
     const d = el('span','li');
     d.innerHTML = `<span class="sw" style="background:${color}"></span> ${label}`;
     lg.appendChild(d);
+    return d;
   };
   const key = state.explorer.key;
   if(state.explorer.show.scale){
@@ -773,7 +793,14 @@ function buildLegend(){
   if(state.explorer.show.chord && state.explorer.chord!=='none') li('#4fc3f7','dźwięk akordu');
   li('#ff5252','tonika: '+pcDisp(key));
   if(state.explorer.show.caged){
-    if(cagedAvailable()) Object.keys(CAGED_COLORS).forEach(l=> li(CAGED_COLORS[l],'kształt '+l));
+    if(cagedAvailable()) Object.keys(CAGED_COLORS).forEach(l=>{
+      const hid = state.explorer.cagedHidden.includes(l);
+      const it = li(CAGED_COLORS[l],'kształt '+l);
+      it.classList.add('clickable'); if(hid) it.classList.add('off');
+      it.dataset.letter=l;
+      it.title = hid ? 'Kształt '+l+' ukryty — kliknij, aby pokazać' : 'Kształt '+l+' — kliknij, aby ukryć';
+      it.onclick = ()=>{ const h=state.explorer.cagedHidden, ix=h.indexOf(l); if(ix>=0) h.splice(ix,1); else h.push(l); saveState(); refreshBoard(); };
+    });
     else li('#888','CAGED: tylko gitara + strojenie Standard / Drop D / Eb');
   }
 }
@@ -794,7 +821,7 @@ $('boardScroll').addEventListener('click', e=>{
   const sSet = pcSet(SCALES[state.explorer.scale].iv);
   if(pc===key) extra=' · tonika';
   else if(sSet.has(rel)) extra=` · interwał ${IV_LABELS[rel]} do ${pcDisp(key)}`;
-  $('boardInfo').innerHTML = `<b>${midiName(midi)}</b> (w zapisie: <b>${pcDisp(pc)}</b>) — struna MIDI ${midi} · próg ${f}${extra}`;
+  $('boardInfo').innerHTML = `<b>${midiName(midi)}</b> (w zapisie: <b>${pcDisp(pc)}</b>) — struna MIDI ${midi} · ${f===0?'próg 0 (pusta struna)':'próg '+f}${extra}`;
 });
 
 /* ================= TRENING ================= */
@@ -837,7 +864,7 @@ function allowedCells(pc){
   const fMax = trainFretMax();
   for(let s=0;s<GEO.S;s++){
     if(!state.settings.stringsMask[s]) continue;
-    for(let f=1;f<=fMax;f++){
+    for(let f=0;f<=fMax;f++){
       if(cellPc(s,f)===pc) out.push({s,f});
     }
   }
@@ -871,7 +898,7 @@ function startQuestion(){
   if(!cells.length){ // np. zbyt wąski zakres — poszerz
     const all = [];
     const fMax = trainFretMax();
-    for(let s=0;s<GEO.S;s++){ if(!state.settings.stringsMask[s]) continue; for(let f=1;f<=fMax;f++) all.push({s,f}); }
+    for(let s=0;s<GEO.S;s++){ if(!state.settings.stringsMask[s]) continue; for(let f=0;f<=fMax;f++) all.push({s,f}); }
     if(!all.length) return;
     const c2 = pick(all);
     return startQuestionAt(c2.s,c2.f);
@@ -1021,7 +1048,7 @@ function renderTrainerView(){
   const strNames = range(GEO?GEO.S:6).filter(s=>state.settings.stringsMask[s]).map(s=>PC_RAW[((GEO.base[s]%12)+12)%12]);
   if(T.phase==='idle' || !Q){
     qT.innerHTML = `Gotowe? Tryb: <span class="big">${MODES[T.mode].label}</span>`;
-    qS.textContent = `Zakres: progi 1–${fMax} · struny: ${strNames.join(' ')} · źródło: ${srcLabel}${modeLimit()?` · limit ${modeLimit()} s`:''}`;
+    qS.textContent = `Zakres: progi 0–${fMax} · struny: ${strNames.join(' ')} · źródło: ${srcLabel}${modeLimit()?` · limit ${modeLimit()} s`:''}`;
     clearTrainerDots();
     $('pad').classList.add('hide');
     $('startBtn').textContent='▶ Start';
@@ -1039,7 +1066,7 @@ function renderTrainerView(){
       $('pad').classList.toggle('hide', !(T.phase==='question'));
     } else {
       qT.innerHTML = (T.mode==='sprint'?'Sprint: ':'Znajdź: ') + `<span class="big">${pcDisp(Q.pc)}</span>`;
-      qS.textContent = 'Kliknij wszystkie właściwe miejsca? Nie — wystarczy jedno trafienie. Kliknij nutę na gryfeu, która nosi tę nazwę.';
+      qS.textContent = 'Kliknij wszystkie właściwe miejsca? Nie — wystarczy jedno trafienie. Kliknij nutę na gryfie, która nosi tę nazwę.';
       qP.style.display='inline-block';
       qP.onclick = ()=> playMidi(cellMidi(Q.s,Q.f), 0.8);
       if(T.phase==='question') { /* brak kropki — to jest pytanie */ }

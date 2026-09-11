@@ -5,7 +5,7 @@ const path = require('path');
 const html = fs.readFileSync(path.join(__dirname, 'index.html'),'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 // eksport dla testów (nie zmienia zachowania aplikacji)
-script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn,ksString,addEarlyRef,applyFades};';
+script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn,ksString,addEarlyRef,applyFades,startQuestionAt,addTrainerDot};';
 
 class EL {
   constructor(tag){ this.tagName=(tag||'div').toUpperCase(); this.children=[]; this.style={}; this.dataset={};
@@ -86,7 +86,7 @@ console.log('— init —');
 ok(byId.keyRow.children.length===12, 'keyRow ma 12 przycisków tonów');
 const boardOuter = byId.boardScroll.children[0];
 ok(!!boardOuter, 'zbudowany eksplorator gryfu');
-ok(boardOuter.countCls('hit')===72, 'eksplorator: 72 pola klikalne (6 strun × 12 progów)');
+ok(boardOuter.countCls('hit')===78, 'eksplorator: 78 pól klikalnych (6×12 + 6 pustych strun)');
 ok(boardOuter.countCls('dot')>=20, 'eksplorator: kropki skali C dur ('+boardOuter.countCls('dot')+')');
 ok(byId.legend.children.length>0, 'legenda wyrenderowana ('+byId.legend.children.length+' pozycji)');
 
@@ -102,6 +102,28 @@ ok(byId.chkCaged.disabled===true, 'CAGED niedostępne w open tunings');
 state.settings.tuning='standard'; T.saveState(); T.buildSettings(); T.syncExplorerChecks();
 state.explorer.show.caged=false;
 
+console.log('— CAGED: klikalna legenda —');
+state.explorer.show.caged=true; state.explorer.cagedHidden=[];
+T.refreshBoard();
+const legItems = byId.legend.children.filter(c=>c.dataset && c.dataset.letter);
+ok(legItems.length===5, 'legenda CAGED ma 5 klikalnych kształtów');
+const itemC = legItems.find(c=>c.dataset.letter==='C');
+ok(itemC && typeof itemC.onclick==='function', 'kształt C klikalny w legendzie');
+itemC.onclick();
+const outerL = byId.boardScroll.children[0];
+let hasC=false, letterDots=0;
+outerL.children.forEach(c=>{ if(c._cls.has('dot') && c._text && /^[CAGED]+$/.test(c._text)){ letterDots++; if(c._text.includes('C')) hasC=true; } });
+ok(!hasC && letterDots>0, 'ukrycie C: kropki C zniknęły, inne zostały ('+letterDots+')');
+const itemC2 = byId.legend.children.find(c=>c.dataset && c.dataset.letter==='C');
+ok(itemC2 && itemC2._cls.has('off'), 'legenda oznacza ukryty kształt (off)');
+T.saveState();
+ok(JSON.parse(localStorage.getItem('fretmaster.v1')).explorer.cagedHidden.includes('C'), 'ukrycie kształtu zapisane');
+itemC2.onclick();
+const outerL2 = byId.boardScroll.children[0];
+let backC=false;
+outerL2.children.forEach(c=>{ if(c._cls.has('dot') && c._text && c._text.includes('C')) backC=true; });
+ok(backC, 'ponowny klik przywraca kształt C');
+state.explorer.show.caged=false; state.explorer.cagedHidden=[];
 console.log('— interwały —');
 state.explorer.show.intervals=true; T.refreshBoard();
 const outer3 = byId.boardScroll.children[0];
@@ -179,6 +201,30 @@ const hit = byId.boardScroll.children[0].children.find(c=>c._cls.has('hit') && +
 hit.fire('click');
 ok(byId.boardInfo._html.includes('F2'), 'klik na nutę pokazuje nazwę (F2: 6 struna, 1 próg)');
 
+console.log('— puste struny —');
+T.setTab('board'); T.renderBoard('boardScroll', true);
+const bOuter = byId.boardScroll.children[0];
+const openHit = bOuter.children.find(c=>c._cls.has('hit') && +c.dataset.f===0 && +c.dataset.s===0);
+ok(!!openHit, 'pusta struna ma pole klikalne przed siodełkiem');
+openHit.fire('click');
+ok(byId.boardInfo._html.includes('pusta struna'), 'klik w pustą strunę: dźwięk + opis');
+const openCells = T.allowedCells(T.cellPc(0,0));
+ok(openCells.some(c=>c.f===0), 'puste struny w puli treningu');
+const snames = bOuter.children.filter(c=>c._cls.has('sname') && c.style.color);
+ok(snames.length===6, 'nazwy strun podświetlone wg skali ('+snames.length+'/6)');
+T.setTab('train'); T.renderTrainerBoard();
+TrainState.mode='nazwij';
+T.renderTrainerView();
+ok(byId.qSub.textContent.includes('0–'), 'zakres treningu obejmuje próg 0');
+T.startQuestionAt(0,0);
+ok(TrainState.Q && TrainState.Q.f===0, 'pytanie może dotyczyć pustej struny');
+const qDot = byId.trainBoardScroll.children[0].children.find(c=>c._cls.has('dot') && c._text==='?');
+const qx = parseFloat(qDot.style.left);
+ok(qDot && qx>=0 && qx<T.GEO().labelW, 'kropka pytania przy pustej strunie (x='+qx+')');
+const cb=TrainState.session.c; T.answerName(TrainState.Q.pc);
+ok(TrainState.session.c===cb+1, 'poprawna odpowiedź na pustą strunę policzona');
+advance();
+T.setTab('board'); T.renderBoard('boardScroll', true); // powrót na gryf (kolejne testy rysują eksplorator)
 console.log('— ustawienia —');
 byId.selFrets.value='22'; byId.selFrets.onchange({target:byId.selFrets});
 ok(T.maxFret()===22, 'zmiana na 22 progi');
