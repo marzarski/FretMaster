@@ -31,11 +31,11 @@
   - [x] usunięcie stopki z aplikacji (2026-09-11, na prośbę użytkownika)
   - [x] białe nazwy trybów treningu (2026-09-11: `button{color:inherit}` +
     jawny kolor `.mode-card .t`; przyczyna: <button> nie dziedziczy koloru)
-  - [x] lepszy dźwięk gitary (HANDOFF §5.3, 2026-09-11): poprawny KS
-    (tłumienie zależne od wysokości, wygładzona kostka), rezonans pudła
-    (peaking 260 Hz +4.5 dB, lowpass 7 kHz), stereo (2 głosy + wczesne
-    odbicia 23/31 ms), kompresor na masterze; 8 testów DSP → 45/37→45 OK.
-    Gałki do kręcenia na żywo: body (Hz/dB), S (jasność), T60, odbicia.
+  - [x] lepszy dźwięk gitary (HANDOFF §5.3, 2026-09-11): poprawny KS,
+    rezonans pudła, stereo, kompresor; 8 testów DSP (37→45 OK).
+    Iteracja 2 (feedback: bardziej gitarowo, góra cichsza, dłużej): drugi
+    rezonans 430 Hz +2 dB, trzask kostki 5 ms, T60 1.5+250/f, bufor 2 s,
+    S 0.38, lowpass 9.5 kHz + presence +2.5 dB, kompensacja góry do +25%.
 - **Krok 2 master-mute ZROBIONY (2026-09-11)**: przycisk 🔊/🔇 w nagłówku
   (po prawej od zakładek, jak w makiecie); flaga `settings.muted` (domyślnie
   false) zapisywana w localStorage; helper `soundOn()` (= sound && !muted)
