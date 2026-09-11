@@ -100,6 +100,17 @@
 ## Błędy z testów na żywo (podgląd w czacie)
 - (wpisywać tu: data, co nie działa, status; po naprawie dopisać rozwiązanie)
 
+- **Pułapka: równoległe edycje tego samego pliku** — kilka wywołań edit_file
+  do jednego pliku w jednym bloku nadpisuje się (zapisuje się tylko jedna).
+  Wiele zmian w jednym pliku = jeden skrypt python albo po kolei.
+- **Pułapka: `gh pr edit` nie działa** (błąd GraphQL `projectCards`) —
+  tytuł/opis PR-a zmieniać przez REST: `gh api -X PATCH
+  repos/marzarski/FretMaster/pulls/N -f title="..." -f body="..."`.
+- **Git: lokalny ref brancha może zgubić historię między turami** (pliki
+  zostają, HEAD wraca do bazy) — wtedy: `git fetch origin <branch>`,
+  `git reset --hard FETCH_HEAD`, nałożyć bieżące zmiany, commit, push.
+  Dlatego: **push po każdej turze ze zmianami** (remote = prawda).
+
 ## TODO (plan — pełna wersja: HANDOFF §6)
 - [x] 0. Przeniesienie: repo `fretmaster` + wgranie v1 + PROGRESS.md + makieta ✓
 - [x] 1. PWA: manifest, ikony, **GitHub Pages** ✓ (działa: marzarski.github.io/FretMaster/)
