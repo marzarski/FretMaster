@@ -36,6 +36,8 @@
     podświetlane wg skali/akordu/CAGED; zakres treningu 0–N; testy → 59 OK
   - [x] klikalna legenda CAGED (2026-09-11): klik w kształt pokazuje/ukrywa go
     (`cagedHidden[]` w localStorage); kropki z wieloma literami aktualizowane
+  - [x] ukryte nazwy strun w treningu (2026-09-11: pusty sname + neutralny
+    title; nazwy zdradzałyby odpowiedź); testy → 61 OK
   - [x] lepszy dźwięk gitary (HANDOFF §5.3, 2026-09-11): poprawny KS,
     rezonans pudła, stereo, kompresor; 8 testów DSP (37→45 OK).
     Iteracja 2 (feedback: bardziej gitarowo, góra cichsza, dłużej): drugi
@@ -136,7 +138,7 @@
 - [x] 0. Przeniesienie: repo `fretmaster` + wgranie v1 + PROGRESS.md + makieta ✓
 - [x] 1. PWA: manifest, ikony, **GitHub Pages** ✓ (działa: marzarski.github.io/FretMaster/)
 - [x] 2. Master-mute ✓
-- [ ] 3. Lepszy dźwięk gitary (wg decyzji)
+- [x] 3. Lepszy dźwięk gitary ✓ (zaakceptowany przez użytkownika)
 - [ ] 4. Metronom: zwykły (metrum, kropki, mutowanie) → rampa → presety
 - [ ] 5. Mikrofon: silnik pitch + „Test mikrofonu" → „znajdź nutę" → „słuch"
 - [ ] 6. Transpozycja akordów

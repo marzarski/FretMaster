@@ -598,7 +598,7 @@ function renderBoard(containerId, decorative){
     outer.appendChild(ln);
     const nm = el('div','sname');
     nm.style.top=(numH+i*rowH)+'px'; nm.style.height=rowH+'px'; nm.style.width=labelW+'px';
-    nm.textContent = midiName(base[s]);
+    nm.textContent = decorative ? midiName(base[s]) : ''; // trening: nazwy ukryte (bez ściągi)
     if(decorative){ // czy pusta struna wchodzi w skalę/akord/CAGED?
       const opc=((base[s]%12)+12)%12, orel=((opc-dKey+12)%12);
       if(opc===dKey) nm.style.color='#ff5252';
@@ -683,7 +683,7 @@ function renderBoard(containerId, decorative){
     oh.dataset.s=s; oh.dataset.f=0;
     oh.style.left='0px'; oh.style.top=(numH+i*rowH)+'px';
     oh.style.width=labelW+'px'; oh.style.height=rowH+'px';
-    oh.title='Pusta struna '+midiName(base[s])+' — kliknij, aby usłyszeć';
+    oh.title = decorative ? 'Pusta struna '+midiName(base[s])+' — kliknij, aby usłyszeć' : 'Pusta struna — kliknij';
     outer.appendChild(oh);
     for(let f=1;f<=N;f++){
       const h = el('div','hit');
