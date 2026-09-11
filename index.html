@@ -443,14 +443,23 @@ function saveState(){
 }
 
 /* ================= AUDIO (Karplus-Strong) ================= */
-let AC=null, masterGain=null;
+let AC=null, masterGain=null, guitarBus=null;
 function audio(){
   if(!AC){
     const Ctx = window.AudioContext || window.webkitAudioContext;
     AC = new Ctx();
     masterGain = AC.createGain();
-    masterGain.gain.value = 0.55;
-    masterGain.connect(AC.destination);
+    masterGain.gain.value = 0.6;
+    const comp = AC.createDynamicsCompressor(); // klej + ochrona przed przesterem
+    comp.threshold.value=-14; comp.ratio.value=3; comp.attack.value=0.004; comp.release.value=0.18;
+    masterGain.connect(comp); comp.connect(AC.destination);
+    // „pudło” gitary: rezonans + zaokrąglenie góry (tylko struny — beepy idą wprost na master)
+    guitarBus = AC.createGain(); guitarBus.gain.value=1;
+    const body = AC.createBiquadFilter();
+    body.type='peaking'; body.frequency.value=260; body.Q.value=0.8; body.gain.value=4.5;
+    const top = AC.createBiquadFilter();
+    top.type='lowpass'; top.frequency.value=7000; top.Q.value=0.3;
+    guitarBus.connect(body); body.connect(top); top.connect(masterGain);
   }
   if(AC.state==='suspended') AC.resume();
   return AC;
@@ -459,21 +468,53 @@ document.addEventListener('pointerdown', function once(){ audio(); }, {once:true
 /* Master-mute (nagłówek) i „Dźwięki” (ustawienia) to DWA niezależne przełączniki:
    dźwięk słychać tylko, gdy OBA pozwalają. */
 function soundOn(){ return state.settings.sound && !state.settings.muted; }
+/* Ulepszona synteza struny (HANDOFF §5.3): poprawny Karplus-Strong z tłumieniem
+   zależnym od wysokości, wygładzona „kostka”, wczesne odbicia i fade'y.
+   Czyste funkcje (bez Web Audio), żeby dało się je testować w node. */
+function rng32(seed){ let a=seed>>>0; return function(){ a|=0; a=(a+0x6D2B79F5)|0; let t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
+function ksString(freq, sr, len, seed){
+  freq = Math.min(Math.max(freq,20), sr*0.3);
+  const rnd = rng32(seed>>>0 || 1);
+  const N = Math.max(2, Math.round(sr/freq));
+  const d = new Float32Array(len);
+  let lp = 0; // kostka: szum wygładzony dolnoprzepustowo — mniej „szkła” w ataku, więcej ciała
+  for(let i=0;i<N && i<len;i++){ const w=rnd()*2-1; lp += 0.4*(w-lp); d[i]=(w*0.45+lp*0.75)*0.62; }
+  const T60 = 1.2 + 200/Math.max(40,freq); // basy wybrzmiewają dłużej (do ~6 s), góra ~1.5 s
+  const damp = Math.pow(10, -3/(T60*freq));
+  const S = 0.42; // wygładzanie pętli: atak jasny, wybrzmienie mięknie (jak tłumienie struny)
+  if(N<len) d[N]=d[0]*damp; // start od N+1, bo d[i-N-1] dla i=N to d[-1] (undefined → NaN!)
+  for(let i=N+1;i<len;i++){ d[i] = (d[i-N]*(1-S) + d[i-N-1]*S) * damp; }
+  return d;
+}
+function addEarlyRef(d, sr, delaySec, gain){ // jedno wczesne odbicie: „powietrze” + szerokość stereo
+  const D = Math.floor(sr*delaySec), src = Float32Array.from(d);
+  let lp = 0;
+  for(let i=D;i<d.length;i++){ lp += 0.25*(src[i-D]-lp); d[i]+=lp*gain; }
+}
+function applyFades(d, sr){ // mikro-fade na starcie i wygaszenie końca — brak klików
+  const fi = Math.min(d.length, Math.floor(sr*0.002));
+  for(let i=0;i<fi;i++) d[i]*=i/fi;
+  const fo = Math.min(d.length, Math.floor(sr*0.08));
+  for(let i=0;i<fo;i++) d[d.length-1-i]*=i/fo;
+}
 function pluck(freq, dur, vol){
   if(!soundOn() || !freq) return;
   try{
     const ac = audio();
     const sr = ac.sampleRate;
-    const N = Math.max(2, Math.round(sr/freq));
-    const len = Math.floor(sr*(dur||1.5));
-    const buf = ac.createBuffer(1, len, sr);
-    const d = buf.getChannelData(0);
-    for(let i=0;i<N && i<len;i++) d[i] = Math.random()*2-1;
-    const damp = 0.996;
-    for(let i=N;i<len;i++){ d[i] = (d[i-N] + d[(i-1)%N]) * 0.5 * damp; }
+    const len = Math.max(64, Math.floor(sr*(dur||1.5)));
+    const buf = ac.createBuffer(2, len, sr); // stereo: dwa rozkorelowane głosy = „grubość”
+    const seed = (Math.random()*0xFFFFFFFF)>>>0;
+    const delays = [0.023, 0.031]; // różne odbicia L/R pogłębiają stereo
+    for(let ch=0;ch<2;ch++){
+      const d = ksString(freq, sr, len, seed+ch*1013);
+      addEarlyRef(d, sr, delays[ch], 0.09);
+      applyFades(d, sr);
+      buf.getChannelData(ch).set(d);
+    }
     const src = ac.createBufferSource(); src.buffer = buf;
     const g = ac.createGain(); g.gain.value = (vol===undefined?1:vol);
-    src.connect(g); g.connect(masterGain);
+    src.connect(g); g.connect(guitarBus);
     src.start();
   }catch(e){}
 }

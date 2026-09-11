@@ -19,7 +19,7 @@ tablecie i komputerze (Android/Chrome: przycisk „Zainstaluj”; iPhone/Safari:
 - ikony generuje `tools/make-icons.sh` (ImageMagick, paleta zgodna z `:root` w `index.html`).
 
 ## 🎸 Gryf (eksplorator)
-- Interaktywny gryf: kliknij dowolną nutę → usłyszysz ją (syntez „struny" Karplus-Strong) i zobaczysz nazwę + interwał,
+- Interaktywny gryf: kliknij dowolną nutę → usłyszysz ją (ulepszona synteza struny: Karplus-Strong + rezonans pudła, stereo) i zobaczysz nazwę + interwał,
 - Podświetlanie: **skala** (9 trybów: dur, minory, pentatoniki, blues, miksolidia, doria), **akord/arpeggio** (15 rodzajów), **interwały** (kolor wg stopnia), **CAGED — 5 kształtów** w dowolnym tonie (weryfikowane matematycznie),
 - Strojenia: Standard, Drop D, Eb, DADGAD, Open G/D/E,
 - Gitara (6 strun, 12/15/22 progi) i **bas** (4 struny, 12/15/20 progów),
@@ -42,5 +42,5 @@ limit czasu na pytanie, dźwięki włącz/wyłącz.
 Trafność i rekordy serii per tryb, rekord sprintu, czas sesji — zapisywane lokalnie (localStorage).
 
 ## 🧪 Testy
-- `node smoke-test.js` — 37 testów smoke (init, CAGED, trening, sprint, ustawienia, master-mute, persystencja),
+- `node smoke-test.js` — 45 testów smoke (init, CAGED, trening, sprint, ustawienia, master-mute, synteza, persystencja),
 - poprawność kształtów CAGED weryfikowana: 2340 kombinacji (12 tonów × 5 kształtów × 3 długości gryfu) — 0 błędów.

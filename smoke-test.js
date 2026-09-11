@@ -5,7 +5,7 @@ const path = require('path');
 const html = fs.readFileSync(path.join(__dirname, 'index.html'),'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 // eksport dla testów (nie zmienia zachowania aplikacji)
-script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn};';
+script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn,ksString,addEarlyRef,applyFades};';
 
 class EL {
   constructor(tag){ this.tagName=(tag||'div').toUpperCase(); this.children=[]; this.style={}; this.dataset={};
@@ -212,6 +212,32 @@ localStorage.setItem('fretmaster.v1', JSON.stringify({settings:{sound:true}}));
 T.loadState();
 ok(state.settings.muted===false && T.soundOn()===true, 'stary zapis bez muted wczytuje się (domyślnie odciszone)');
 
+console.log('— synteza struny —');
+{
+  const sr=44100, f=110, len=sr, d=T.ksString(f,sr,len,12345);
+  ok(d instanceof Float32Array && d.length===len, 'ksString: zwraca bufor Float32Array');
+  let finite=true, peak=0;
+  for(let i=0;i<len;i++){ if(!isFinite(d[i])){ finite=false; break; } const a=Math.abs(d[i]); if(a>peak) peak=a; }
+  ok(finite, 'ksString: wszystkie próbki skończone (brak NaN)');
+  ok(peak>0.1 && peak<1.0, 'ksString: poziom sygnału w normie (peak '+peak.toFixed(2)+')');
+  const half=len>>1; let e1=0,e2=0;
+  for(let i=0;i<half;i++){ e1+=d[i]*d[i]; e2+=d[i+half]*d[i+half]; }
+  ok(e2<e1, 'ksString: struna wybrzmiewa (energia II połowy mniejsza)');
+  const N=Math.round(sr/f); let num=0,den=0;
+  const seg0=N*4, segN=4096;
+  for(let i=0;i<segN;i++){ const x=d[seg0+i], y=d[seg0+i-N]; num+=x*y; den+=x*x; }
+  ok(num/den>0.6, 'ksString: stabilny ton (korelacja okresowa '+(num/den).toFixed(2)+')');
+  const d2=T.ksString(f,sr,len,999);
+  let diff=0; for(let i=0;i<512;i++) diff+=Math.abs(d[i]-d2[i]);
+  ok(diff>0.01, 'ksString: inny seed = inny atak (rozkarelowanie stereo)');
+  T.applyFades(d2, sr);
+  ok(d2[len-1]===0, 'applyFades: koniec bufora wygaszony (brak klików)');
+  const r=T.ksString(f,sr,2048,7), cpy=Float32Array.from(r);
+  T.addEarlyRef(r, sr, 0.023, 0.09);
+  let rd=0, pk=0;
+  for(let i=0;i<r.length;i++){ rd+=Math.abs(r[i]-cpy[i]); const a=Math.abs(r[i]); if(a>pk) pk=a; }
+  ok(rd>0 && pk<1.0, 'addEarlyRef: subtelne odbicie bez przesteru');
+}
 console.log('— persystencja —');
 T.saveState();
 const saved = JSON.parse(localStorage.getItem('fretmaster.v1'));
