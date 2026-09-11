@@ -17,7 +17,15 @@
   ikony `icons/` (192/512 + maskable + apple-touch + favicon; generator:
   `tools/make-icons.sh`, ImageMagick, paleta z `:root`). Rejestracja SW tylko
   przy https/localhost — **`file://` nadal działa normalnie** (wymóg z HANDOFF 5.5).
-  Testy po zmianach: 29/29 OK. **Zostało**: włączenie GitHub Pages + test na telefonie.
+  Testy po zmianach: 29/29 OK.
+- **Krok 1 ZAMKNIĘTY (2026-09-11)**: GitHub Pages działa pod
+  https://marzarski.github.io/FretMaster/ (potwierdzone przez użytkownika).
+- **Krok 2 master-mute ZROBIONY (2026-09-11)**: przycisk 🔊/🔇 w nagłówku
+  (po prawej od zakładek, jak w makiecie); flaga `settings.muted` (domyślnie
+  false) zapisywana w localStorage; helper `soundOn()` (= sound && !muted)
+  bramkuje `pluck()` i `beep()`; `aria-pressed` dla czytników. Testy: 37/37 OK
+  (8 nowych: ikona, zapis, klik, niezależność od „Dźwięki”, stary zapis bez
+  `muted`). `CACHE_VERSION` w sw.js podniesiony na 2026-09-11.
 
 ## Decyzje (zatwierdzone przez użytkownika)
 1. **Forma: A — PWA** (telefon/tablet/komputer, offline). Natywne (Electron/APK)
@@ -83,8 +91,8 @@
 
 ## TODO (plan — pełna wersja: HANDOFF §6)
 - [x] 0. Przeniesienie: repo `fretmaster` + wgranie v1 + PROGRESS.md + makieta ✓
-- [ ] 1. PWA: manifest, ikony, **GitHub Pages**, test na telefonie (priorytet!)
-- [ ] 2. Master-mute
+- [x] 1. PWA: manifest, ikony, **GitHub Pages** ✓ (działa: marzarski.github.io/FretMaster/)
+- [x] 2. Master-mute ✓
 - [ ] 3. Lepszy dźwięk gitary (wg decyzji)
 - [ ] 4. Metronom: zwykły (metrum, kropki, mutowanie) → rampa → presety
 - [ ] 5. Mikrofon: silnik pitch + „Test mikrofonu" → „znajdź nutę" → „słuch"

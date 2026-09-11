@@ -25,6 +25,7 @@ tablecie i komputerze (Android/Chrome: przycisk „Zainstaluj”; iPhone/Safari:
 - Gitara (6 strun, 12/15/22 progi) i **bas** (4 struny, 12/15/20 progów),
 - Orientacja praworęczna / leworęczna (LH/RH), wyłączanie strun,
 - Nazwy nut: międzynarodowe (C, C#, D…) lub polskie/niemieckie (C, Cis, D, Des, H, B).
+- Przycisk 🔊/🔇 w nagłówku wycisza całą apkę jednym kliknięciem (master-mute, zapamiętywany).
 
 ## 🎯 Trening (4 tryby)
 | Tryb | Zasady |
@@ -41,5 +42,5 @@ limit czasu na pytanie, dźwięki włącz/wyłącz.
 Trafność i rekordy serii per tryb, rekord sprintu, czas sesji — zapisywane lokalnie (localStorage).
 
 ## 🧪 Testy
-- `node smoke-test.js` — 29 testów smoke (init, CAGED, trening, sprint, ustawienia, persystencja),
+- `node smoke-test.js` — 37 testów smoke (init, CAGED, trening, sprint, ustawienia, master-mute, persystencja),
 - poprawność kształtów CAGED weryfikowana: 2340 kombinacji (12 tonów × 5 kształtów × 3 długości gryfu) — 0 błędów.

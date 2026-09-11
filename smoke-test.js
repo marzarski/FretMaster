@@ -5,7 +5,7 @@ const path = require('path');
 const html = fs.readFileSync(path.join(__dirname, 'index.html'),'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 // eksport dla testów (nie zmienia zachowania aplikacji)
-script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail};';
+script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn};';
 
 class EL {
   constructor(tag){ this.tagName=(tag||'div').toUpperCase(); this.children=[]; this.style={}; this.dataset={};
@@ -20,6 +20,8 @@ class EL {
   set textContent(v){ this._text=String(v); this.children=[]; }
   get innerHTML(){ return this._html||''; }
   set innerHTML(v){ this._html=String(v); if(v==='') this.children=[]; }
+  setAttribute(k,v){ (this._attrs=this._attrs||{})[k]=String(v); }
+  getAttribute(k){ return (this._attrs||{})[k]||null; }
   get firstChild(){ return this.children[0]||null; }
   appendChild(c){ c.parentNode=this; this.children.push(c); return c; }
   remove(){ if(this.parentNode){ const i=this.parentNode.children.indexOf(this); if(i>=0) this.parentNode.children.splice(i,1); this.parentNode=null; } }
@@ -46,7 +48,7 @@ function reg(id, tag){ const e=new EL(tag||'div'); e.id=id; byId[id]=e; return e
 ['keyRow','selScale','selChord','chkScale','chkChord','chkIntervals','chkCaged','chkCagedWrap','boardScroll','legend','boardInfo',
  'modeRow','qText','qSub','qPlay','startBtn','skipBtn','timeBar','tStats','trainBoardScroll','pad','typeBuf','typeLine',
  'sprintOverlay','sprintScore','sprintBestLine','sprintAgain','sprintClose','statGrid','statTable','sesLine','btnResetStats',
- 'selInstrument','selTuning','selFrets','selLh','stringRow','selTrainFrets','selTrainSource','selLimit','chkSound','chkNames','selLang']
+ 'selInstrument','selTuning','selFrets','selLh','stringRow','selTrainFrets','selTrainSource','selLimit','chkSound','chkNames','selLang','btnMute']
  .forEach(id=>reg(id, id.startsWith('sel')?'select':(id.startsWith('chk')?'input':'div')));
 
 const body = new EL('body');
@@ -191,6 +193,24 @@ byId.selLh.value='rh'; byId.selLh.onchange({target:byId.selLh});
 T.refreshBoard();
 const sname1 = byId.boardScroll.children[0].children.find(c=>c._cls.has('sname'));
 ok(sname1 && sname1.textContent==='E4', 'orientacja RH: najwyższa struna E4 na górze ('+sname1.textContent+')');
+
+console.log('— master-mute —');
+ok(T.soundOn()===true, 'domyślnie dźwięk włączony');
+T.setMuted(true);
+ok(state.settings.muted===true && T.soundOn()===false, 'mute wycisza wszystko');
+ok(byId.btnMute.textContent==='🔇', 'przycisk pokazuje 🔇');
+T.updateMuteBtn();
+ok(byId.btnMute.getAttribute('aria-pressed')==='true', 'aria-pressed=true przy wyciszeniu');
+T.saveState();
+ok(JSON.parse(localStorage.getItem('fretmaster.v1')).settings.muted===true, 'mute zapisane w localStorage');
+byId.btnMute.onclick();
+ok(state.settings.muted===false && T.soundOn()===true && byId.btnMute.textContent==='🔊', 'klik w przycisk odciszania przywraca dźwięk');
+state.settings.sound=false; T.setMuted(true); state.settings.sound=true;
+ok(T.soundOn()===false, 'mute działa niezależnie od ustawienia „Dźwięki”');
+T.setMuted(false); state.settings.sound=true;
+localStorage.setItem('fretmaster.v1', JSON.stringify({settings:{sound:true}}));
+T.loadState();
+ok(state.settings.muted===false && T.soundOn()===true, 'stary zapis bez muted wczytuje się (domyślnie odciszone)');
 
 console.log('— persystencja —');
 T.saveState();

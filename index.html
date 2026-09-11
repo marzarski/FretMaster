@@ -32,6 +32,9 @@ nav{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
 .tab-btn{background:transparent;border:1px solid transparent;color:var(--muted);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600}
 .tab-btn:hover{color:var(--txt);background:var(--panel2)}
 .tab-btn.active{background:var(--panel2);color:var(--txt);border-color:var(--line)}
+.mute-btn{border:1px solid var(--line);background:var(--panel2);color:var(--txt);border-radius:9px;padding:8px 12px;cursor:pointer;font-size:15px;line-height:1}
+.mute-btn:hover{border-color:var(--acc)}
+.mute-btn.muted{opacity:.6;border-color:var(--bad)}
 main{max-width:1180px;margin:0 auto;padding:16px 14px 60px}
 section{display:none}
 section.active{display:block}
@@ -137,6 +140,7 @@ footer{text-align:center;color:#5b6673;font-size:12px;padding:18px;line-height:1
     <button class="tab-btn" data-tab="stats">📊 Statystyki</button>
     <button class="tab-btn" data-tab="settings">⚙️ Ustawienia</button>
   </nav>
+  <button class="mute-btn" id="btnMute" title="Wycisz wszystko (master-mute)" aria-label="Wycisz wszystkie dźwięki">🔊</button>
 </header>
 <main>
 
@@ -390,7 +394,7 @@ const DEFAULT_SETTINGS = {
   instrument:'guitar', tuning:'standard', frets:12, lh:false,
   stringsMask:[1,1,1,1,1,1],
   trainFrets:12, trainSource:'all', trainLimit:0,
-  sound:true, showNames:true, noteLang:'en',
+  sound:true, muted:false, showNames:true, noteLang:'en',
 };
 const DEFAULT_STATS = {
   global:{q:0,c:0,bestStreak:0,sprintBest:0},
@@ -458,8 +462,11 @@ function audio(){
   return AC;
 }
 document.addEventListener('pointerdown', function once(){ audio(); }, {once:true});
+/* Master-mute (nagłówek) i „Dźwięki” (ustawienia) to DWA niezależne przełączniki:
+   dźwięk słychać tylko, gdy OBA pozwalają. */
+function soundOn(){ return state.settings.sound && !state.settings.muted; }
 function pluck(freq, dur, vol){
-  if(!state.settings.sound || !freq) return;
+  if(!soundOn() || !freq) return;
   try{
     const ac = audio();
     const sr = ac.sampleRate;
@@ -478,7 +485,7 @@ function pluck(freq, dur, vol){
 }
 function playMidi(m, vol){ pluck(midiFreq(m), 1.5, vol===undefined?0.9:vol); }
 function beep(ok){
-  if(!state.settings.sound) return;
+  if(!soundOn()) return;
   try{
     const ac = audio();
     const o = ac.createOscillator(), g = ac.createGain();
@@ -489,6 +496,21 @@ function beep(ok){
     o.connect(g); g.connect(masterGain);
     o.start(); o.stop(ac.currentTime+(ok?0.2:0.28));
   }catch(e){}
+}
+
+/* ================= MASTER-MUTE (przycisk w nagłówku) ================= */
+function updateMuteBtn(){
+  const b = $('btnMute'); if(!b) return;
+  const m = !!state.settings.muted;
+  b.textContent = m ? '🔇' : '🔊';
+  b.classList.toggle('muted', m);
+  b.title = m ? 'Włącz dźwięk (master-mute)' : 'Wycisz wszystko (master-mute)';
+  b.setAttribute('aria-pressed', m ? 'true' : 'false');
+}
+function setMuted(m){
+  state.settings.muted = !!m;
+  saveState();
+  updateMuteBtn();
 }
 
 /* ================= GRYF ================= */
@@ -1110,6 +1132,7 @@ function bindSettings(){
   $('selChord').onchange = e=>{ state.explorer.chord=e.target.value; saveState(); refreshBoard(); };
   const bindChk = (id, key)=>{ $(id).onchange = e=>{ state.explorer.show[key]=e.target.checked; saveState(); refreshBoard(); }; };
   bindChk('chkScale','scale'); bindChk('chkChord','chord'); bindChk('chkIntervals','intervals'); bindChk('chkCaged','caged');
+  $('btnMute').onclick = ()=> setMuted(!state.settings.muted);
   window.addEventListener('resize', ()=>{ if(currentTab==='board'||currentTab==='train') refreshBoard(); });
 }
 function syncExplorerChecks(){
@@ -1150,6 +1173,7 @@ buildKeyRow();
 buildSelects();
 buildPad();
 bindSettings();
+updateMuteBtn();
 syncExplorerChecks();
 buildModeRow();
 renderBoard('boardScroll', true);
