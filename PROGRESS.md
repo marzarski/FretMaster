@@ -41,9 +41,10 @@
   - [x] metronom: tryb zwykły (2026-09-11): BPM 20–300, metrum 2–16, kropki
     z mutowaniem, akcent na 1, scheduler lookahead (25 ms / 150 ms), gra w tle
     zakładek (migotanie), zapis w localStorage
-  - [x] metronom: rampa (2026-09-11): n/p, drewno + dzwonek, przyrost liniowy
-    od bazy (%/BPM), max (hold/stop/restart), wizualizacja przebiegu, fazy
-    kropek; czysta maszynka faz (metroRampNext) → testy 99 OK
+  - [x] metronom: rampa (2026-09-11): przyrost liniowy od bazy (%/BPM),
+    max (hold/stop/restart), wizualizacja, czysta maszynka faz.
+    Iteracja 2 (feedback): rezygnacja z przygotowania; cykl START (s taktów,
+    dzwonek, złote kropki) → TRENING (n) w tym samym tempie → START wyżej…
   - [x] lepszy dźwięk gitary (HANDOFF §5.3, 2026-09-11): poprawny KS,
     rezonans pudła, stereo, kompresor; 8 testów DSP (37→45 OK).
     Iteracja 2 (feedback: bardziej gitarowo, góra cichsza, dłużej): drugi

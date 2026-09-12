@@ -5,7 +5,7 @@ const path = require('path');
 const html = fs.readFileSync(path.join(__dirname, 'index.html'),'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 // eksport dla testów (nie zmienia zachowania aplikacji)
-script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn,ksString,addEarlyRef,applyFades,startQuestionAt,addTrainerDot,Metro,metroNormalize,metroMuted,metroStart,metroStop,metroFlash,buildMetroUI,buildMetroDots,bindMetro,metroFmtT,metroRampTempo,metroRampNext,metroOnBar,buildMetroFlow,refreshMetroLive,metroPhaseLabel,metroWood,metroBell};';
+script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn,ksString,addEarlyRef,applyFades,startQuestionAt,addTrainerDot,Metro,metroNormalize,metroMuted,metroStart,metroStop,metroFlash,buildMetroUI,buildMetroDots,bindMetro,metroFmtT,metroRampTempo,metroRampNext,metroOnBar,buildMetroFlow,refreshMetroLive,metroPhaseLabel,metroBell};';
 
 class EL {
   constructor(tag){ this.tagName=(tag||'div').toUpperCase(); this.children=[]; this.style={}; this.dataset={};
@@ -50,7 +50,7 @@ function reg(id, tag){ const e=new EL(tag||'div'); e.id=id; byId[id]=e; return e
  'sprintOverlay','sprintScore','sprintBestLine','sprintAgain','sprintClose','statGrid','statTable','sesLine','btnResetStats',
  'selInstrument','selTuning','selFrets','selLh','stringRow','selTrainFrets','selTrainSource','selLimit','chkSound','chkNames','selLang','btnMute',
  'metroDots','metroBpmDisp','metroBpm','metroBeats','metroStart','metroMinus','metroPlus','metroBar',
- 'metroModeSimple','metroModeRamp','metroRampPanel','metroBase','metroStepPct','metroStepBpm','metroStep','metroN','metroP','metroMax','metroEnd','metroFlow','metroPhase']
+ 'metroModeSimple','metroModeRamp','metroRampPanel','metroBase','metroStepPct','metroStepBpm','metroStep','metroN','metroS','metroMax','metroEnd','metroFlow','metroPhase']
  .forEach(id=>reg(id, id.startsWith('sel')?'select':(id.startsWith('chk')?'input':'div')));
 
 const body = new EL('body');
@@ -326,59 +326,55 @@ T.loadState();
 ok(state.metro.bpm===80 && state.metro.beats===4, 'metronom: stary zapis bez metro → domyślne');
 console.log('— metronom: rampa —');
 {
-  const R=o=>T.metroRampNext(Object.assign({n:4,p:4,base:80,stepType:'pct',step:1,max:120,end:'hold',tempo:80},o));
-  let r=R({phase:'train',phaseBar:0,k:0});
-  ok(r.phase==='train'&&r.phaseBar===1&&r.tempo===80, 'rampa: kolejny takt treningu');
+  const R=o=>T.metroRampNext(Object.assign({n:4,st:2,base:80,stepType:'pct',step:1,max:120,end:'hold'},o));
+  let r=R({phase:'start',phaseBar:0,k:0});
+  ok(r.phase==='start'&&r.phaseBar===1&&r.tempo===80, 'rampa: kolejny takt startu');
+  r=R({phase:'start',phaseBar:1,k:0});
+  ok(r.phase==='train'&&r.kTrain===0&&r.tempo===80, 'rampa: po starcie trening w tym samym tempie');
+  r=R({phase:'train',phaseBar:0,k:0});
+  ok(r.phase==='train'&&r.phaseBar===1, 'rampa: kolejny takt treningu');
   r=R({phase:'train',phaseBar:3,k:0});
-  ok(r.phase==='prep'&&r.kTrain===1&&r.tempo===80.8, 'rampa: po treningu przygotowanie nowym tempem (80.8)');
-  r=R({phase:'prep',phaseBar:1,k:1,tempo:80.8});
-  ok(r.phase==='prep'&&r.phaseBar===2, 'rampa: kolejne przygotowanie');
-  r=R({phase:'prep',phaseBar:2,k:1,tempo:80.8});
-  ok(r.phase==='bell', 'rampa: ostatni przygotowawczy to dzwonek');
-  r=R({phase:'bell',phaseBar:0,k:1,tempo:80.8});
-  ok(r.phase==='train'&&r.kTrain===1&&r.tempo===80.8, 'rampa: po dzwonku trening nowym tempem');
-  r=R({phase:'train',phaseBar:3,k:0,p:1});
-  ok(r.phase==='bell', 'rampa: p=1 → sam dzwonek bez drewna');
+  ok(r.phase==='start'&&r.kTrain===1&&r.tempo===80.8, 'rampa: po treningu start wyżej (80.8)');
   r=R({phase:'train',phaseBar:3,k:2,base:100,stepType:'pct',step:5,max:112});
-  ok(!r.stop&&r.tempo===112&&r.kTrain===3, 'rampa: hold trzyma max (112)');
+  ok(!r.stop&&r.phase==='start'&&r.tempo===112&&r.kTrain===3, 'rampa: hold trzyma max (112)');
   r=R({phase:'train',phaseBar:3,k:2,base:100,stepType:'pct',step:5,max:112,end:'stop'});
   ok(r.stop===true, 'rampa: stop na limicie');
   r=R({phase:'train',phaseBar:3,k:2,base:100,stepType:'pct',step:5,max:112,end:'restart'});
-  ok(!r.stop&&r.tempo===100&&r.kTrain===0, 'rampa: restart wraca do bazy');
+  ok(!r.stop&&r.phase==='start'&&r.tempo===100&&r.kTrain===0, 'rampa: restart wraca do bazy');
   ok(T.metroRampTempo(80,'pct',1,5)===84 && T.metroRampTempo(80,'bpm',2,3)===86, 'rampa: przyrost liniowy od bazy (84 / 86)');
   ok(T.metroRampTempo(80,'pct',1,0)===80, 'rampa: krok 0 to baza');
 }
 byId.metroModeRamp.onclick();
 ok(state.metro.mode==='rampa' && !byId.metroRampPanel._cls.has('dim') && byId.metroBpm.disabled===true, 'rampa: tryb + panel + blokada BPM');
-ok(byId.metroFlow.children.length>=5, 'rampa: wizualizacja przebiegu');
-T.metroFlash(0,'bell');
-ok(byId.metroDots.children[0]._cls.has('bell'), 'rampa: złota kropka dzwonka');
-T.metroFlash(1,'prep');
-ok(byId.metroDots.children[1]._cls.has('prep') && !byId.metroDots.children[0]._cls.has('bell'), 'rampa: niebieska kropka przygotowania');
+ok(byId.metroFlow.children.length>=9, 'rampa: okienka Start i Trening');
+T.metroFlash(0,'start');
+ok(byId.metroDots.children[0]._cls.has('bell'), 'rampa: złota kropka startu');
+T.metroFlash(1,'train');
+ok(!byId.metroDots.children[1]._cls.has('bell') && !byId.metroDots.children[0]._cls.has('bell'), 'rampa: trening bez złota');
 byId.metroN.value='2'; byId.metroN.onchange({target:byId.metroN});
-byId.metroP.value='1'; byId.metroP.onchange({target:byId.metroP});
-ok(state.metro.n===2 && state.metro.p===1, 'rampa: zmiana n/p');
+byId.metroS.value='3'; byId.metroS.onchange({target:byId.metroS});
+ok(state.metro.n===2 && state.metro.s===3, 'rampa: zmiana n/s');
 state.metro.n=99; state.metro.endMode='x'; T.metroNormalize();
 ok(state.metro.n===16 && state.metro.endMode==='hold', 'rampa: normalizacja n i endMode');
 byId.metroN.value='4'; byId.metroN.onchange({target:byId.metroN});
-byId.metroP.value='4'; byId.metroP.onchange({target:byId.metroP});
+byId.metroS.value='2'; byId.metroS.onchange({target:byId.metroS});
 byId.metroModeSimple.onclick();
 ok(state.metro.mode==='simple' && byId.metroBpm.disabled===false, 'rampa: powrót do zwykłego');
-// integracja: pełny cykl przez metroOnBar (n=1, p=1 — najkrótszy)
-state.metro.mode='rampa'; state.metro.n=1; state.metro.p=1; state.metro.base=100;
+// integracja: pełny cykl przez metroOnBar (n=1, s=1 — najkrótszy)
+state.metro.mode='rampa'; state.metro.n=1; state.metro.s=1; state.metro.base=100;
 state.metro.stepType='pct'; state.metro.step=10; state.metro.maxBpm=105; state.metro.endMode='hold';
-T.Metro.playing=true; T.Metro.phase='train'; T.Metro.phaseBar=0; T.Metro.kTrain=0; T.Metro.rTempo=100;
+T.Metro.playing=true; T.Metro.phase='start'; T.Metro.phaseBar=0; T.Metro.kTrain=0; T.Metro.rTempo=100;
 T.metroOnBar();
-ok(T.Metro.phase==='bell' && T.Metro.rTempo===105, 'rampa live: trening → dzwonek @ max (hold)');
+ok(T.Metro.phase==='train' && T.Metro.rTempo===100, 'rampa live: start → trening @ 100');
 T.metroOnBar();
-ok(T.Metro.phase==='train' && T.Metro.kTrain===1, 'rampa live: dzwonek → trening kroku 1');
+ok(T.Metro.phase==='start' && T.Metro.rTempo===105 && T.Metro.kTrain===1, 'rampa live: trening → start @ max (hold)');
 T.metroOnBar();
-ok(T.Metro.phase==='bell' && T.Metro.rTempo===105, 'rampa live: hold trzyma 105 w kolejnym cyklu');
+ok(T.Metro.phase==='train' && T.Metro.kTrain===1, 'rampa live: start → trening kroku 1');
 T.Metro.phase='train'; T.Metro.phaseBar=0; state.metro.endMode='stop';
 T.metroOnBar();
 ok(T.Metro.playing===false && byId.metroPhase.textContent.includes('105'), 'rampa live: stop + podsumowanie na limicie');
-T.Metro.playing=false; T.Metro.phase='train'; T.Metro.phaseBar=0; T.Metro.kTrain=0; T.Metro.rTempo=80;
-state.metro.mode='simple'; state.metro.n=4; state.metro.p=4; state.metro.base=80; state.metro.maxBpm=120;
+T.Metro.playing=false; T.Metro.phase='start'; T.Metro.phaseBar=0; T.Metro.kTrain=0; T.Metro.rTempo=80;
+state.metro.mode='simple'; state.metro.n=4; state.metro.s=2; state.metro.base=80; state.metro.maxBpm=120;
 state.metro.step=1; state.metro.stepType='pct'; state.metro.endMode='hold';
 T.buildMetroUI();
 console.log('— persystencja —');

@@ -142,7 +142,6 @@ input.num:focus{outline:2px solid var(--acc);outline-offset:1px}
 .mdot.b1{border-color:var(--acc)}
 .mdot.mut{opacity:.4;text-decoration:line-through}
 .mbar{font-size:22px;font-weight:800;min-width:60px}
-.mdot.on.prep{background:#4d96ff;border-color:#fff;color:#fff}
 .mdot.on.bell{background:#ffd75e;border-color:#fff;color:#151006;transform:scale(1.3)}
 .modechip{border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:13.5px;color:var(--muted)}
 .modechip.active{border-color:var(--acc);color:var(--txt)}
@@ -274,13 +273,13 @@ input.num:disabled,.btn:disabled{opacity:.5}
       <div><label class="small">Tempo bazowe (= 100%)</label><div><input class="num" id="metroBase" value="80" inputmode="decimal" autocomplete="off"> <span style="color:var(--muted);font-size:12px">BPM</span></div></div>
       <div><label class="small">Przyrost na krok</label><div class="row" style="gap:6px"><button class="modechip active" id="metroStepPct">%</button><button class="modechip" id="metroStepBpm">BPM</button><input class="num" id="metroStep" value="1" inputmode="decimal" autocomplete="off"></div></div>
       <div><label class="small">Takty treningowe (n)</label><input class="num" id="metroN" value="4" inputmode="numeric" autocomplete="off"></div>
-      <div><label class="small">Takty przygotowawcze (p)</label><input class="num" id="metroP" value="4" inputmode="numeric" autocomplete="off"></div>
+      <div><label class="small">Takty startu (s)</label><input class="num" id="metroS" value="2" inputmode="numeric" autocomplete="off"></div>
       <div><label class="small">Tempo maksymalne</label><div><input class="num" id="metroMax" value="120" inputmode="numeric" autocomplete="off"> <span style="color:var(--muted);font-size:12px">BPM</span></div></div>
       <div><label class="small">Po osiągnięciu max</label><select id="metroEnd"><option value="hold">trzymaj tempo</option><option value="stop">stop + podsumowanie</option><option value="restart">restart od startu</option></select></div>
     </div>
     <div class="flow" id="metroFlow"></div>
     <div class="mphase" id="metroPhase"></div>
-    <p class="hint">Przyrost liczy się <b>zawsze od tempa bazowego</b> (liniowo: 80.8, 81.6, 82.4…). Takty przygotowawcze grają już <b>nowym</b> tempem i mają inną barwę; ostatni z nich = charakterystyczny dzwonek = <b>start ćwiczenia</b>. Maska wyciszonych uderzeń działa przez całą rampę.</p>
+    <p class="hint">Rampa gra na przemian: <b>Start</b> (dzwonek) → <b>Trening</b> — oba w tym samym tempie. Każdy kolejny Start jest szybszy o przyrost (<b>liniowo od bazy</b>: 80.8, 81.6, 82.4…). Maska wyciszonych uderzeń działa przez całą rampę.</p>
   </div>
 </section>
 
@@ -476,7 +475,7 @@ const DEFAULT_STATS = {
 };
 const DEFAULT_METRO = {
   bpm:80, beats:4, mask:[],
-  mode:'simple', base:80, stepType:'pct', step:1, n:4, p:4, maxBpm:120, endMode:'hold',
+  mode:'simple', base:80, stepType:'pct', step:1, n:4, s:2, maxBpm:120, endMode:'hold',
   presets:[],
 };
 let state = {
@@ -1299,7 +1298,7 @@ function syncExplorerChecks(){
 }
 
 /* ================= METRONOM ================= */
-const Metro = {playing:false, beat:0, bar:1, nextTime:0, timer:null, phase:'train', phaseBar:0, kTrain:0, rTempo:80};
+const Metro = {playing:false, beat:0, bar:1, nextTime:0, timer:null, phase:'start', phaseBar:0, kTrain:0, rTempo:80};
 function metroNormalize(){
   const m = state.metro;
   m.bpm = Math.min(300, Math.max(20, Math.round(+m.bpm)||80));
@@ -1313,7 +1312,7 @@ function metroNormalize(){
   m.step = Math.min(100, Math.max(0.1, +m.step||1));
   if(m.stepType!=='bpm') m.stepType='pct';
   m.n = Math.min(16, Math.max(1, Math.round(+m.n)||4));
-  m.p = Math.min(16, Math.max(1, Math.round(+m.p)||4));
+  m.s = Math.min(16, Math.max(1, Math.round(+m.s)||2));
   if(m.mode!=='rampa') m.mode='simple';
   if(!['hold','stop','restart'].includes(m.endMode)) m.endMode='hold';
   if(!Array.isArray(m.presets)) m.presets=[];
@@ -1327,19 +1326,17 @@ function metroRampTempo(base, stepType, step, k){
 /* Czysta maszynka faz rampy (testy w node, bez audio/timerów).
    Wejście na granicy taktu — wyjście: następna faza + tempo. */
 function metroRampNext(s){
+  // s={phase:'start'|'train',phaseBar,k,n,st,base,stepType,step,max,end}
   const T = kk => metroRampTempo(s.base, s.stepType, s.step, kk);
-  if(s.phase==='train'){
-    if(s.phaseBar < s.n-1) return {phase:'train', phaseBar:s.phaseBar+1, kTrain:s.k, tempo:T(s.k), stop:false};
-    const raw = T(s.k+1);
-    if(raw > s.max && s.end==='stop') return {phase:'train', phaseBar:s.phaseBar, kTrain:s.k, tempo:T(s.k), stop:true};
-    const restart = raw > s.max && s.end==='restart';
-    return {phase: s.p>1?'prep':'bell', phaseBar:0, kTrain: restart?0:s.k+1, tempo: restart?s.base:(raw>s.max?s.max:raw), stop:false};
+  if(s.phase==='start'){
+    if(s.phaseBar < s.st-1) return {phase:'start', phaseBar:s.phaseBar+1, kTrain:s.k, tempo:T(s.k), stop:false};
+    return {phase:'train', phaseBar:0, kTrain:s.k, tempo:T(s.k), stop:false}; // trening w tym samym tempie co start
   }
-  if(s.phase==='prep'){
-    if(s.phaseBar < s.p-2) return {phase:'prep', phaseBar:s.phaseBar+1, kTrain:s.k, tempo:s.tempo, stop:false};
-    return {phase:'bell', phaseBar:0, kTrain:s.k, tempo:s.tempo, stop:false};
-  }
-  return {phase:'train', phaseBar:0, kTrain:s.k, tempo:s.tempo, stop:false}; // po dzwonku: trening nowym tempem
+  if(s.phaseBar < s.n-1) return {phase:'train', phaseBar:s.phaseBar+1, kTrain:s.k, tempo:T(s.k), stop:false};
+  const raw = T(s.k+1);
+  if(raw > s.max && s.end==='stop') return {phase:'train', phaseBar:s.phaseBar, kTrain:s.k, tempo:T(s.k), stop:true};
+  const restart = raw > s.max && s.end==='restart';
+  return {phase:'start', phaseBar:0, kTrain: restart?0:s.k+1, tempo: restart?s.base:(raw>s.max?s.max:raw), stop:false};
 }
 function metroTabBtn(){
   const bs = document.querySelectorAll('.tab-btn');
@@ -1357,19 +1354,6 @@ function metroClick(accent, t){
     g.gain.exponentialRampToValueAtTime(0.0001, t+0.055);
     o.connect(g); g.connect(masterGain);
     o.start(t); o.stop(t+0.07);
-  }catch(e){}
-}
-function metroWood(accent, t){ // cichsze „drewno” na takty przygotowawcze
-  try{
-    const ac = AC || audio();
-    const o = ac.createOscillator(), g = ac.createGain();
-    o.type='sine';
-    o.frequency.value = accent?780:620;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(accent?0.2:0.15, t+0.002);
-    g.gain.exponentialRampToValueAtTime(0.0001, t+0.045);
-    o.connect(g); g.connect(masterGain);
-    o.start(t); o.stop(t+0.06);
   }catch(e){}
 }
 function metroBell(accent, t){ // jasny dzwonek: podstawa + oktawa, długie wybrzmienie
@@ -1395,8 +1379,7 @@ function metroTick(){
   while(Metro.nextTime < AC.currentTime + 0.15){
     const bi = Metro.beat, t = Metro.nextTime;
     if(!metroMuted(bi) && soundOn()){
-      if(rampa && Metro.phase==='prep') metroWood(bi===0, t);
-      else if(rampa && Metro.phase==='bell') metroBell(bi===0, t);
+      if(rampa && Metro.phase==='start') metroBell(bi===0, t);
       else metroClick(bi===0, t);
     }
     const ph = rampa?Metro.phase:'train';
@@ -1410,7 +1393,7 @@ function metroTick(){
 function metroOnBar(){
   if(state.metro.mode!=='rampa') return;
   const m=state.metro;
-  const r=metroRampNext({phase:Metro.phase, phaseBar:Metro.phaseBar, k:Metro.kTrain, n:m.n, p:m.p, base:m.base, stepType:m.stepType, step:m.step, max:m.maxBpm, end:m.endMode, tempo:Metro.rTempo});
+  const r=metroRampNext({phase:Metro.phase, phaseBar:Metro.phaseBar, k:Metro.kTrain, n:m.n, st:m.s, base:m.base, stepType:m.stepType, step:m.step, max:m.maxBpm, end:m.endMode});
   if(r.stop){ metroStop(); $('metroPhase').textContent='🏁 Osiągnięto '+metroFmtT(m.maxBpm)+' BPM — koniec rampy.'; return; }
   Metro.phase=r.phase; Metro.phaseBar=r.phaseBar; Metro.kTrain=r.kTrain; Metro.rTempo=r.tempo;
   buildMetroFlow(); refreshMetroLive();
@@ -1428,14 +1411,13 @@ function refreshMetroLive(){
 function metroPhaseLabel(){
   const m=state.metro, t=metroFmtT(Metro.rTempo);
   if(Metro.phase==='train') return '🎯 Trening @ '+t+' (takt '+(Metro.phaseBar+1)+'/'+m.n+')';
-  if(Metro.phase==='prep') return '🪵 Przygotowanie @ '+t+' (takt '+(Metro.phaseBar+1)+'/'+(m.p-1)+')';
-  return '🔔 START! @ '+t+' — od teraz ćwiczenie';
+  return '🔔 Start @ '+t+' (takt '+(Metro.phaseBar+1)+'/'+m.s+')';
 }
 function metroStart(){
   if(typeof window==='undefined' || (!window.AudioContext && !window.webkitAudioContext)) return false;
   const ac = audio();
   Metro.playing=true; Metro.beat=0; Metro.bar=1;
-  Metro.phase='train'; Metro.phaseBar=0; Metro.kTrain=0;
+  Metro.phase='start'; Metro.phaseBar=0; Metro.kTrain=0;
   Metro.rTempo = state.metro.mode==='rampa' ? metroRampTempo(state.metro.base, state.metro.stepType, state.metro.step, 0) : state.metro.bpm;
   Metro.nextTime=ac.currentTime+0.08;
   if(Metro.timer) clearInterval(Metro.timer);
@@ -1459,8 +1441,7 @@ function metroFlash(i, phase){
   for(let k=0;k<w.children.length;k++){
     const c=w.children[k];
     c.classList.toggle('on', k===i);
-    c.classList.toggle('prep', k===i && ph==='prep');
-    c.classList.toggle('bell', k===i && ph==='bell');
+    c.classList.toggle('bell', k===i && ph==='start');
   }
   metroBarUI();
 }
@@ -1480,7 +1461,7 @@ function buildMetroFlow(){
   const w=$('metroFlow'); if(!w) return;
   const m=state.metro;
   const live = Metro.playing && m.mode==='rampa';
-  let k = live ? (Metro.phase==='train'?Metro.kTrain:Metro.kTrain-1) : 0;
+  let k = live ? Metro.kTrain : 0;
   if(k<0) k=0;
   const T0=metroRampTempo(m.base,m.stepType,m.step,k);
   let T1=metroRampTempo(m.base,m.stepType,m.step,k+1);
@@ -1488,12 +1469,13 @@ function buildMetroFlow(){
   w.innerHTML='';
   const step=(txt,cls,cur)=>{ const d=el('div','fstep'+(cls?' '+cls:'')+(cur?' cur':'')); d.textContent=txt; w.appendChild(d); };
   const arrow=()=>{ const a=el('span','farrow'); a.textContent='→'; w.appendChild(a); };
-  step('🎯 trening ×'+m.n+' @ '+metroFmtT(T0), '', live&&Metro.phase==='train');
+  step('🔔 Start ×'+m.s+' @ '+metroFmtT(T0), 'bell', live&&Metro.phase==='start');
   arrow();
-  if(m.p>1){ step('🪵 przygot. ×'+(m.p-1)+' @ '+metroFmtT(T1), 'prep', live&&Metro.phase==='prep'); arrow(); }
-  step('🔔 start @ '+metroFmtT(T1), 'bell', live&&Metro.phase==='bell');
+  step('🎯 Trening ×'+m.n+' @ '+metroFmtT(T0), '', live&&Metro.phase==='train');
   arrow();
-  step('🎯 trening ×'+m.n+' @ '+metroFmtT(T1), '', false);
+  step('🔔 Start ×'+m.s+' @ '+metroFmtT(T1), 'bell', false);
+  arrow();
+  step('🎯 Trening ×'+m.n+' @ '+metroFmtT(T1), '', false);
   arrow();
   step('… aż do '+metroFmtT(m.maxBpm), '', false);
 }
@@ -1515,7 +1497,7 @@ function buildMetroUI(){
   $('metroStepBpm').classList.toggle('active', m.stepType==='bpm');
   $('metroStep').value=m.step;
   $('metroN').value=m.n;
-  $('metroP').value=m.p;
+  $('metroS').value=m.s;
   $('metroMax').value=m.maxBpm;
   $('metroEnd').value=m.endMode;
   buildMetroDots();
@@ -1542,7 +1524,7 @@ function bindMetro(){
   num('metroBase', v=>{ state.metro.base=v; });
   num('metroStep', v=>{ state.metro.step=v; });
   num('metroN', v=>{ state.metro.n=v; });
-  num('metroP', v=>{ state.metro.p=v; });
+  num('metroS', v=>{ state.metro.s=v; });
   num('metroMax', v=>{ state.metro.maxBpm=v; });
   $('metroEnd').onchange=e=>{ state.metro.endMode=e.target.value; saveState(); buildMetroUI(); };
 }
