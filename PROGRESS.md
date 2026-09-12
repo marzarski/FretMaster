@@ -17,7 +17,45 @@
   ikony `icons/` (192/512 + maskable + apple-touch + favicon; generator:
   `tools/make-icons.sh`, ImageMagick, paleta z `:root`). Rejestracja SW tylko
   przy https/localhost — **`file://` nadal działa normalnie** (wymóg z HANDOFF 5.5).
-  Testy po zmianach: 29/29 OK. **Zostało**: włączenie GitHub Pages + test na telefonie.
+  Testy po zmianach: 29/29 OK.
+- **Krok 1 ZAMKNIĘTY W CAŁOŚCI (2026-09-11)**: GitHub Pages DZIAŁA pod
+  https://marzarski.github.io/FretMaster/ — repo publiczne, PR #1 scalony,
+  apka zainstalowana na telefonie użytkownika.
+- **Rytm pracy (ustalony, obowiązuje)**: jedna sesja = jedna paczka kilku zmian;
+  scalamy dopiero po kilku iteracjach poprawek (jeden PR na końcu paczki),
+  NIE po każdej zmianie. Testy na żywo w podglądzie w czacie (dźwięki apki
+  działają; mikrofon w podglądzie może być zablokowany przez iframe — wtedy
+  test mikrofonu robimy na wersji scalonej na Pages).
+- **W robocie (bieżąca paczka, PR #2 — NIE scalać przed końcem)**:
+  - [x] master-mute (przycisk w nagłówku, 37/37 testów)
+  - [x] usunięcie stopki z aplikacji (2026-09-11, na prośbę użytkownika)
+  - [x] białe nazwy trybów treningu (2026-09-11: `button{color:inherit}` +
+    jawny kolor `.mode-card .t`; przyczyna: <button> nie dziedziczy koloru)
+  - [x] puste struny (próg 0, 2026-09-11): klik na strunę przed siodełkiem
+    (eksplorator + trening: pytania, odpowiedzi, kropki); nazwy strun
+    podświetlane wg skali/akordu/CAGED; zakres treningu 0–N; testy → 59 OK
+  - [x] klikalna legenda CAGED (2026-09-11): klik w kształt pokazuje/ukrywa go
+    (`cagedHidden[]` w localStorage); kropki z wieloma literami aktualizowane
+  - [x] ukryte nazwy strun w treningu (2026-09-11: pusty sname + neutralny
+    title; nazwy zdradzałyby odpowiedź)
+  - [x] metronom: tryb zwykły (2026-09-11): BPM 20–300, metrum 2–16, kropki
+    z mutowaniem, akcent na 1, scheduler lookahead (25 ms / 150 ms), gra w tle
+    zakładek (migotanie), zapis w localStorage
+  - [x] metronom: rampa (2026-09-11): przyrost liniowy od bazy (%/BPM),
+    max (hold/stop/restart), wizualizacja, czysta maszynka faz.
+    Iteracja 2 (feedback): rezygnacja z przygotowania; cykl START (s taktów,
+    dzwonek, złote kropki) → TRENING (n) w tym samym tempie → START wyżej…
+  - [x] lepszy dźwięk gitary (HANDOFF §5.3, 2026-09-11): poprawny KS,
+    rezonans pudła, stereo, kompresor; 8 testów DSP (37→45 OK).
+    Iteracja 2 (feedback: bardziej gitarowo, góra cichsza, dłużej): drugi
+    rezonans 430 Hz +2 dB, trzask kostki 5 ms, T60 1.5+250/f, bufor 2 s,
+    S 0.38, lowpass 9.5 kHz + presence +2.5 dB, kompensacja góry do +25%. Dźwięk zaakceptowany przez użytkownika.
+- **Krok 2 master-mute ZROBIONY (2026-09-11)**: przycisk 🔊/🔇 w nagłówku
+  (po prawej od zakładek, jak w makiecie); flaga `settings.muted` (domyślnie
+  false) zapisywana w localStorage; helper `soundOn()` (= sound && !muted)
+  bramkuje `pluck()` i `beep()`; `aria-pressed` dla czytników. Testy: 37/37 OK
+  (8 nowych: ikona, zapis, klik, niezależność od „Dźwięki”, stary zapis bez
+  `muted`). `CACHE_VERSION` w sw.js podniesiony na 2026-09-11.
 
 ## Decyzje (zatwierdzone przez użytkownika)
 1. **Forma: A — PWA** (telefon/tablet/komputer, offline). Natywne (Electron/APK)
@@ -81,13 +119,53 @@
   ograniczony; Android — mitygacja „cichą pętlą audio", jeśli testy pokażą
   zamrażanie renderera.
 
+- **Synteza (pułapka)**: pętla KS musi startować od `N+1`, bo `d[i-N-1]`
+  dla `i=N` to `d[-1]` = undefined → NaN w całym buforze. Stary kod miał
+  wadliwy człon `(d[i-N]+d[(i-1)%N])*0.5` — stąd „chuda” barwa v1.
+- **CACHE_VERSION**: w trakcie paczki (przed scaleniem) NIE podbijamy co
+  commit — wystarczy, że różni się od wersji na Pages (2026-09-10).
+- **Rampa: tempa zaokrąglane do 0.1** (`metroRampTempo`) — inaczej float daje
+  80.80000001; fazy liczone na granicach taktów (`metroOnBar`), a dźwięki
+  planowane na granicy uderzeń (lookahead) — dwa poziomy planowania.
+
+## Błędy z testów na żywo (podgląd w czacie)
+- 2026-09-11, mute: użytkownik widzi przycisk, ikona zmienia się 🔊/🔇 (tak),
+  dźwięki apki słychać (tak). Weryfikacja wyciszenia: kliknąć 🔇, potem nutę
+  na gryfie — ma być cisza. Status: czeka na test użytkownika.
+
+- **Pułapka: równoległe edycje tego samego pliku** — kilka wywołań edit_file
+  do jednego pliku w jednym bloku nadpisuje się (zapisuje się tylko jedna).
+  Wiele zmian w jednym pliku = jeden skrypt python albo po kolei.
+- **Pułapka: `gh pr edit` nie działa** (błąd GraphQL `projectCards`) —
+  tytuł/opis PR-a zmieniać przez REST: `gh api -X PATCH
+  repos/marzarski/FretMaster/pulls/N -f title="..." -f body="..."`.
+- **Git: lokalny ref brancha może zgubić historię między turami** (pliki
+  zostają, HEAD wraca do bazy; zdarzyło się 2×) — wtedy NIE commitować na
+  starym HEAD (robi się rozjazd). Recepta: `git fetch origin <branch>` →
+  `git reset --soft FETCH_HEAD` (drzewo zostaje, HEAD na remote) → sprawdzić,
+  że `git diff --cached` to tylko bieżąca zmiana → commit → push.
+  Dlatego: **push po każdej turze ze zmianami** (remote = prawda).
+
+## Tuner — spec (pomysł użytkownika 2026-09-11; budowa po kroku 5)
+- Strojenie gitary przez mikrofon telefonu/tabletu; **wspólny silnik
+  detekcji pitch** z modułami mikrofonowymi (5.6/5.7) — budujemy raz,
+  używamy w 3 miejscach.
+- Wizualizacja: poziomy pasek, **środek = idealnie nastrojone**; kolor od
+  odchyłki: czerwony → niebieski → **zielony (środek)** → niebieski →
+  czerwony (symetrycznie w obie strony).
+- Pokazuje: najbliższą nutę, odchyłkę w centach, kierunek (za nisko / za wysoko).
+- Start: tryb chromatyczny (dowolna nuta) + podpowiedź struny; wybór
+  konkretnej struny jako opcja (do decyzji przy budowie).
+
 ## TODO (plan — pełna wersja: HANDOFF §6)
 - [x] 0. Przeniesienie: repo `fretmaster` + wgranie v1 + PROGRESS.md + makieta ✓
-- [ ] 1. PWA: manifest, ikony, **GitHub Pages**, test na telefonie (priorytet!)
-- [ ] 2. Master-mute
-- [ ] 3. Lepszy dźwięk gitary (wg decyzji)
-- [ ] 4. Metronom: zwykły (metrum, kropki, mutowanie) → rampa → presety
+- [x] 1. PWA: manifest, ikony, **GitHub Pages** ✓ (działa: marzarski.github.io/FretMaster/)
+- [x] 2. Master-mute ✓
+- [x] 3. Lepszy dźwięk gitary ✓ (zaakceptowany przez użytkownika)
+- [ ] 4. Metronom: zwykły ✓ → rampa ✓ (2026-09-11) → presety
 - [ ] 5. Mikrofon: silnik pitch + „Test mikrofonu" → „znajdź nutę" → „słuch"
+- [ ] 5b. 🎚️ Tuner do strojenia gitary (pomysł użytkownika 2026-09-11 —
+  po silniku pitch z kroku 5; spec: PROGRESS „Tuner — spec”)
 - [ ] 6. Transpozycja akordów
 - [ ] 7. Poradnik (samouczki + teoria, uwzględnia nowe moduły)
 - [ ] 8. Testy końcowe (smoke + ręcznie z użytkownikiem, na telefonie)

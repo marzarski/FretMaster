@@ -5,7 +5,7 @@
    WAŻNE (dla developera): przy każdej istotnej zmianie aplikacji
    podnieś CACHE_VERSION — stara pamięć podręczna zostanie usunięta,
    a użytkownicy dostaną świeże pliki. Format: data wydania. */
-const CACHE_VERSION = 'fretmaster-cache-2026-09-10';
+const CACHE_VERSION = 'fretmaster-cache-2026-09-11';
 const ASSETS = [
   './',
   './index.html',
