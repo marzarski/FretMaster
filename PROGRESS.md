@@ -140,8 +140,10 @@
   tytuł/opis PR-a zmieniać przez REST: `gh api -X PATCH
   repos/marzarski/FretMaster/pulls/N -f title="..." -f body="..."`.
 - **Git: lokalny ref brancha może zgubić historię między turami** (pliki
-  zostają, HEAD wraca do bazy) — wtedy: `git fetch origin <branch>`,
-  `git reset --hard FETCH_HEAD`, nałożyć bieżące zmiany, commit, push.
+  zostają, HEAD wraca do bazy; zdarzyło się 2×) — wtedy NIE commitować na
+  starym HEAD (robi się rozjazd). Recepta: `git fetch origin <branch>` →
+  `git reset --soft FETCH_HEAD` (drzewo zostaje, HEAD na remote) → sprawdzić,
+  że `git diff --cached` to tylko bieżąca zmiana → commit → push.
   Dlatego: **push po każdej turze ze zmianami** (remote = prawda).
 
 ## Tuner — spec (pomysł użytkownika 2026-09-11; budowa po kroku 5)
