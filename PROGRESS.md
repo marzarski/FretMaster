@@ -26,7 +26,7 @@
   NIE po każdej zmianie. Testy na żywo w podglądzie w czacie (dźwięki apki
   działają; mikrofon w podglądzie może być zablokowany przez iframe — wtedy
   test mikrofonu robimy na wersji scalonej na Pages).
-- **W robocie (bieżąca paczka, PR #2 — NIE scalać przed końcem)**:
+- **Paczka v2 GOTOWA (PR #2, 16 commitów, 109/109, 2026-09-11)** — wszystko poniżej zrobione, przetestowane na żywo i zaakceptowane. Scalenie: użytkownik scala PR #2 na github.com → Pages buduje się ~2 min → telefon dostaje aktualizację (otworzyć apkę, ewentualnie 2×).:
   - [x] master-mute (przycisk w nagłówku, 37/37 testów)
   - [x] usunięcie stopki z aplikacji (2026-09-11, na prośbę użytkownika)
   - [x] białe nazwy trybów treningu (2026-09-11: `button{color:inherit}` +
@@ -60,20 +60,24 @@
   bramkuje `pluck()` i `beep()`; `aria-pressed` dla czytników. Testy: 37/37 OK
   (8 nowych: ikona, zapis, klik, niezależność od „Dźwięki”, stary zapis bez
   `muted`). `CACHE_VERSION` w sw.js podniesiony na 2026-09-11.
+- **Stan na koniec czatu (2026-09-11)**: paczka v2 kompletna (12 pozycji,
+  109/109 testów, wszystko zaakceptowane na żywo). PR #2 gotowy do scalenia.
+  Po scaleniu: Pages = v1 + paczka v2. Następny krok: 5. Mikrofon.
 
 ## Decyzje (zatwierdzone przez użytkownika)
 1. **Forma: A — PWA** (telefon/tablet/komputer, offline). Natywne (Electron/APK)
    odrzucone na teraz. Repo: `fretmaster` (private, puste na starcie).
    Inne repo użytkownika (inna apka, inny czat) — **nie dotykać**.
+   (Aktualizacja 2026-09-11: repo nazywa się `FretMaster`, jest PUBLICZNE, Pages działa.)
 2. **Workspace**: z podpiętym GitHubem użytkownik zapisuje pliki **TYLKO do repo**
    (brak standardowego workspace). Wszystkie pliki projektu żyją w repo.
-3. **Metronom** (specyfikacja 5.1): metrum jako wartość do wpisania (2–16),
-   kliknięcia jako kropki, mutowanie dowolnej kropki (oba tryby); rampa:
-   n taktów treningowych (dom. 4) + p przygotowawczych (dom. 4, w nowym tempie,
-   cichsza barwa; **ostatni = charakterystyczny dzwonek = start**); przyrost
-   % lub BPM, **zawsze od temapa bazowego (liniowo)**; tempo maks. + zachowanie
-   na limicie (domyślnie: trzymaj — do potwierdzenia); **presety: nazwane,
-   zmiana kolejności (strzałki + drag), zapis w localStorage**.
+3. **Metronom** (jak ZBUDOWANO 2026-09-11 — zmiana względem HANDOFF 5.1!):
+   tryb zwykły: BPM 20–300, metrum 2–16, kropki + mutowanie, akcent na 1;
+   rampa: cykl **START (s taktów, dzwonek, złote kropki) → TRENING (n) w tym
+   samym tempie → START wyżej** o krok liniowo od bazy (%/BPM); max: hold
+   (domyślnie) / stop / restart; wizualizacja przebiegu; **presety: nazwane,
+   kolejność (strzałki + drag za uchwyt), zapis w localStorage**; usuwanie
+   presetu na 2 kliki (bez modali).
 4. **Mikrofon — znajdź nutę (5.6)**: apka pokazuje nazwę → gracz odgrywa na
    gitarze → mikrofon (pitch detection) → OK = następna nuta;
    **liczba nut w sesji = konkretna liczba do wpisania**;
@@ -91,6 +95,16 @@
 8. **PWA**: manifest + ikony, offline, **GitHub Pages** (https = warunek dla
    mikrofonu; z `file://` bywa blokowany) → etap 2 planu (priorytet).
 9. **Mikrofon wymaga https** — konsekwencja: Pages przed modułami mikrofonowymi.
+10. **Puste struny (próg 0, 2026-09-11)**: klik na strunę przed siodełkiem
+    (eksplorator + trening: pytania/odpowiedzi/kropki); nazwy strun
+    podświetlane wg skali/akordu/CAGED; zakres treningu 0–N; w treningu
+    nazwy ukryte (ściąga zdradzałaby odpowiedź).
+11. **Legenda CAGED klikalna** (2026-09-11): pokazuje/ukrywa kształty
+    (`cagedHidden[]` w localStorage).
+12. **Stopka usunięta** z aplikacji (2026-09-11, na prośbę użytkownika).
+13. **Tuner (pomysł użytkownika, krok 5b)**: strojenie przez mikrofon, pasek
+    czerwony→niebieski→**zielony (środek)**→niebieski→czerwony; budowa
+    po silniku pitch z kroku 5 (spec: PROGRESS „Tuner — spec”).
 
 ## Do potwierdzenia przez użytkownika — WSZYSTKO POTWIERDZONE (2026-09-10)
 1. **Dźwięk gitary: ulepszona synteza** (harmoniki, rezonans pudła, tłumienie
@@ -99,6 +113,8 @@
    gotowe rutyny ćwiczeń).
 3. **Metronom na limicie tempa: trzymaj max** (gra dalej w tempie maksymalnym).
 4. **Layout `makieta-v2.html` zaakceptowany** — podążać za makieta przy budowie UI.
+5. **Dźwięki metronomu i gitary zaakceptowane na żywo (2026-09-11)** — klik,
+   dzwonek Start, synteza v2 (iteracja 2). Bez zastrzeżeń.
 
 ## Problemy / rozwiązania / pułapki
 - **PWA — smoke test**: test wyciąga **pierwszy** blok `<script>` — kod rejestracji
@@ -114,8 +130,9 @@
   (w przeglądarce — stringi); przejścia między pytaniami w aplikacji biegną
   przez `setTimeout` — w teście symulowane ręcznie (funkcja `advance()`).
 - **Audio**: `AudioContext` tylko po pierwszym geście (autoplay policy);
-  syntez = Karplus-Strong (delay line + tłumienie 0.996) — w v2 ma być
-  wzbogacona (harmoniki, rezonans pudła).
+  synteza v2 (od 2026-09-11): poprawny KS (T60 1.5+250/f, kostka, trzask),
+  rezonans pudła (260 + 430 Hz), stereo, kompresor; strojenie DOKŁADNE
+  (bez detune — apka treningowa!). Metronom: klik/dzwonek (sine).
 - **GitHub (kontekst użytkownika)**: użytkownik jest początkujący — każdy krok
   po polsku, pojedynczo, z potwierdzeniem. Podpięty GitHub = brak workspace
    Arena (zapis tylko do repo).
@@ -139,7 +156,7 @@
 ## Błędy z testów na żywo (podgląd w czacie)
 - 2026-09-11, mute: użytkownik widzi przycisk, ikona zmienia się 🔊/🔇 (tak),
   dźwięki apki słychać (tak). Weryfikacja wyciszenia: kliknąć 🔇, potem nutę
-  na gryfie — ma być cisza. Status: czeka na test użytkownika.
+  na gryfie — ma być cisza. Status: ZWERYFIKOWANE — użytkownik potwierdził działanie (2026-09-11).
 
 - **Pułapka: równoległe edycje tego samego pliku** — kilka wywołań edit_file
   do jednego pliku w jednym bloku nadpisuje się (zapisuje się tylko jedna).
@@ -169,6 +186,14 @@
   konkretnej struny jako opcja (do decyzji przy budowie).
 
 ## TODO (plan — pełna wersja: HANDOFF §6)
+> **NASTĘPNY CZAT — zacznij tutaj**: ① sprawdź, czy PR #2 jest scalony
+> (main zawiera paczkę v2: mute, dźwięk v2, puste struny, CAGED-legenda,
+> metronom kompletny; testy 109/109); ② zweryfikuj Pages na telefonie
+> użytkownika (nowa wersja ~2 min po scaleniu; apkę otworzyć, ewent. 2×);
+> ③ ruszaj z krokiem **5. Mikrofon**: najpierw silnik pitch + „Test
+> mikrofonu”, potem „znajdź nutę”, potem „słuch”. Uwaga: mic może być
+> zablokowany w podglądzie-iframe — wtedy test na scalonej wersji na Pages.
+> Rytm: jedna sesja = jedna paczka (patrz „Rytm pracy” wyżej).
 - [x] 0. Przeniesienie: repo `fretmaster` + wgranie v1 + PROGRESS.md + makieta ✓
 - [x] 1. PWA: manifest, ikony, **GitHub Pages** ✓ (działa: marzarski.github.io/FretMaster/)
 - [x] 2. Master-mute ✓
