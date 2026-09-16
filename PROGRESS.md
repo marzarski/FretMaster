@@ -18,6 +18,12 @@
   `tools/make-icons.sh`, ImageMagick, paleta z `:root`). Rejestracja SW tylko
   przy https/localhost — **`file://` nadal działa normalnie** (wymóg z HANDOFF 5.5).
   Testy po zmianach: 29/29 OK.
+- **Sesja 2026-09-16 (chat `arena/01a0a9be-fretmaster`)**: zweryfikowano stan
+  startowy — PR #2 scalony (`main` = c5e877f), `node smoke-test.js` → **109 OK,
+  0 FAIL**, drzewo czyste. Na prośbę użytkownika dopisano do `HANDOFF.md`
+  **dział 1B „Jak działa praca w Arenie (cykl sesji)”** + pułapki tutaj
+  (podgląd bez mikrofonu; scalenie PR-a = zamknięcie sesji → nowy czat z
+  podpiętym repo). Kodu apki nie ruszano.
 - **Krok 1 ZAMKNIĘTY W CAŁOŚCI (2026-09-11)**: GitHub Pages DZIAŁA pod
   https://marzarski.github.io/FretMaster/ — repo publiczne, PR #1 scalony,
   apka zainstalowana na telefonie użytkownika.
@@ -150,6 +156,17 @@
   planowane na granicy uderzeń (lookahead) — dwa poziomy planowania.
 - **Modale w iframe**: `prompt`/`confirm` mogą być blokowane w podglądzie —
   preset: nazwa przez input, usuwanie na 2 kliki (arm), bez modali.
+- **Arena: podgląd (LIVE PREVIEW) nie daje mikrofonu** — serwer w sandboxie jest
+  pokazany w iframe na obcej domenie (`https://{port}-{sandboxId}.e2b.app`);
+  `python3 -m http.server` nie wysyła `cross-origin-embedder-policy: allow-iframe`,
+  więc `getUserMedia` jest blokowane (polityka iframe + brak secure context po
+  stronie apki). To ograniczenie platformy, nie bug — moduły mikrofonowe testujemy
+  na `localhost:8000` u użytkownika albo na Pages (https) po scaleniu.
+- **Arena: scalenie PR-a ZAMYKA sesję** — po merge w tym czacie nie da się dalej
+  pracować ani zapisywać w repo; użytkownik zakłada nowy czat z podpiętym repo
+  i pisze „przeczytaj plik instrukcja”. Wniosek: PR dopiero na końcu paczki,
+  a przed jego otwarciem trzeba użytkownika uprzedzić (pełny opis: HANDOFF §1B,
+  dodany 2026-09-16 na prośbę użytkownika).
 - **DnD zjada kliki**: `draggable` na całym wierszu pożera kliknięcia w jego
   przyciski (zwłaszcza Firefox i dotyk) — przeciąganie tylko za uchwyt.
 
@@ -194,6 +211,9 @@
 > mikrofonu”, potem „znajdź nutę”, potem „słuch”. Uwaga: mic może być
 > zablokowany w podglądzie-iframe — wtedy test na scalonej wersji na Pages.
 > Rytm: jedna sesja = jedna paczka (patrz „Rytm pracy” wyżej).
+> Cykl sesji w Arenie (branch sesji, podgląd LIVE, mikrofon, scalenie = koniec
+> sesji → nowy czat): **HANDOFF §1B** — zapisane 2026-09-16, żeby nie tłumaczyć
+> tego od nowa w każdym czacie.
 - [x] 0. Przeniesienie: repo `fretmaster` + wgranie v1 + PROGRESS.md + makieta ✓
 - [x] 1. PWA: manifest, ikony, **GitHub Pages** ✓ (działa: marzarski.github.io/FretMaster/)
 - [x] 2. Master-mute ✓

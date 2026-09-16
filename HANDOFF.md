@@ -1,12 +1,14 @@
-# STATUS 2026-09-11 (czytaj najpierw!)
+# STATUS 2026-09-16 (czytaj najpierw!)
 
 > Sesja-paczka z 2026-09-11 kończy się scaleniem **PR #2** („Paczka zmian”):
 > mute, dźwięk v2, puste struny, CAGED-legenda, metronom kompletny
 > (109/109 testów, wszystko zaakceptowane na żywo).
-> **Najpierw SPRAWDŹ, czy PR #2 jest scalony** (main zawiera paczkę v2?).
-> Jeśli tak — stan to **v1 + paczka v2 na main**, Pages działa — i od razu:
-> wczytaj `PROGRESS.md` (sekcja „NASTĘPNY CZAT”) i ruszaj z krokiem **5.
-> Mikrofon**. Procedura startowa z §2 (zakładanie repo) jest NIEAKTUALNA
+> **PR #2 SCALONY (zweryfikowano 2026-09-16: `main` = c5e877f, testy 109/109 OK)**
+> Zanim cokolwiek zrobisz, przeczytaj **dział 1B „Jak działa praca w Arenie”**:
+> branch sesji, podgląd LIVE (bez mikrofonu!), **scalenie PR-a = zamknięcie
+> tej sesji → dalej nowy czat z podpiętym tym samym repo**.
+> Potem wczytaj `PROGRESS.md` (sekcja „NASTĘPNY CZAT”) i ruszaj z krokiem
+> **5. Mikrofon**. Procedura startowa z §2 (zakładanie repo) jest NIEAKTUALNA
 > (repo `FretMaster` istnieje, publiczne, Pages działa). Specyfikacje §5
 > i plan §6 nadal aktualne, z wyjątkami w PROGRESS (rampa v2:
 > START→TRENING; nowy krok 5b: Tuner).
@@ -87,6 +89,52 @@ Obowiązki:
 3. Obecny (poprzedni) czat prowadził dziennik w `PROGRESS.md` w workspace —
    ten plik dociera do Ciebie w załączniku; po wgraniu do repo **repo jest
    jedynym źródłem prawdy**.
+
+---
+
+## 1B. JAK DZIAŁA PRACA W ARENIE (cykl sesji) — WIEDZA OBOWIĄZKOWA DLA KAŻDEGO CZATU
+
+> Dział dodany 2026-09-16 na prośbę użytkownika, żeby nie tłumaczyć tego od nowa
+> w każdym czacie. **Nie musisz pytać użytkownika o te rzeczy — po prostu tak pracuj.**
+
+**Cykl jednej paczki (tak działamy od 2026-09-10):**
+1. Każdy czat Areny pracuje na **własnym branchu sesji** o nazwie
+   `arena/01…-fretmaster` (bieżącą nazwę pokaże `git status -sb`). **NIGDY nie
+   przełączaj się na inny branch, nie twórz nowych i nie pushuj poza branch tej
+   sesji** — Arena rozpoznaje sesję po jego nazwie; praca na innym branchu nie
+   zostanie z nią skojarzona.
+2. Zmiany: commit + push **po każdej turze** na branch sesji (remote = prawda;
+   patrz pułapka „lokalny ref może zgubić historię” w `PROGRESS.md`).
+3. **Podgląd w czacie (LIVE PREVIEW)**: serwer uruchomiony z sandboxa
+   (np. `python3 -m http.server 8000 --bind 0.0.0.0`) jest widoczny w przeglądarce
+   użytkownika pod `https://{port}-{sandboxId}.e2b.app`. Tak testujemy na żywo
+   wszystko, co nie wymaga mikrofonu (klikanie, dźwięki, logika, UI).
+   **Mikrofon w tym podglądzie NIE działa**: to iframe na obcej domenie bez
+   nagłówków zezwalających (`cross-origin-embedder-policy: allow-iframe` i spółka)
+   → `getUserMedia` jest blokowane. To ograniczenie platformy, nie bug apki —
+   nie próbuj tego obchodzić w kodzie.
+4. **Scalenie PR-a = ZAMKNIĘCIE tej sesji.** Po scaleniu w tym czacie znika
+   możliwość dalszej pracy i zapisywania poprawek w repo (branch sesji jest zużyty).
+   Dlatego scalenie jest **ostatnim krokiem paczki**, nigdy w trakcie pracy —
+   i dlatego nie proponuj użytkownikowi scalania „żeby coś przetestować”.
+5. **Po scaleniu użytkownik zakłada NOWY czat** z podpiętym tym samym repo
+   i pisze **„przeczytaj plik instrukcja”** → nowy czat wczytuje `HANDOFF.md`
+   + `PROGRESS.md`, streszcza stan i kontynuuje (§1A pkt 2). **NIE zakładamy
+   nowego repo**: `marzarski/FretMaster` (publiczne, Pages) jest trwałe, każda
+   kolejna sesja dokłada do niego tylko nowy branch.
+6. **Checklista na koniec paczki (przed PR-em):**
+   - [ ] `PROGRESS.md` zaktualizowany (co zrobione, decyzje, pułapki, wynik testów) — commit `log: …`,
+   - [ ] `CACHE_VERSION` w `sw.js` podniesiony na datę scalenia (inaczej telefony dostaną starą wersję z cache),
+   - [ ] `node smoke-test.js` → wszystko OK,
+   - [ ] `gh pr create` z brancha sesji — polski tytuł i opis z listą zmian,
+   - [ ] **powiedz użytkownikowi**, że scalenie kończy tę sesję i że po nim trzeba
+         otworzyć nowy czat z podpiętym repo — niech sam zdecyduje, kiedy scala,
+   - [ ] po scaleniu: Pages buduje się ~2 min → test na telefonie
+         `https://marzarski.github.io/FretMaster/` (apkę otworzyć, ewentualnie 2×).
+7. **Mikrofon przed scaleniem** da się przetestować tylko poza podglądem:
+   (a) na komputerze użytkownika — `python3 -m http.server` i adres
+   `http://localhost:8000` (localhost jest „bezpiecznym kontekstem”, mikrofon
+   działa bez https), albo (b) dopiero po scaleniu — na Pages, na telefonie.
 
 ---
 
