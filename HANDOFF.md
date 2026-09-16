@@ -332,11 +332,19 @@ elementy oznaczone NEW = nowości względem v1).
 - Pole 2 (cel transpozycji) — **dwa zachowania**:
   - **puste** → pokazane opcje: transpozycja o liczbę **półtonów w górę lub
     w dół** (np. przyciski/slider −12…+12),
-  - **wpisany jeden akord** (np. `F`) → transpozacja tak, by **pierwszy akord
+  - **wpisany jeden akord** (np. `F`) → transpozycja tak, by **pierwszy akord
     sekwencji stał się nim** (odległość liczona z toniki: C→F = +5; cała
-    sekwencja przesuwa się o +5 → `F D G Bb`).
+    sekwencja przesuwa się o +5 → `F D G C`).
+    > **UWAGA (2026-09-16): w pierwotnym przykładzie była literówka** — przy +5
+    > akord G daje C, nie Bb. Zaimplementowano REGUŁĘ (wynik `F D G C`),
+    > testy smoke jej pilnują. Szczegóły: `PROGRESS.md` → „Rozbieżność w
+    > HANDOFF §5.8”.
 - Wynik: nowa sekwencja + info o przesunięciu (np. „+5 pól"), przycisk
   kopiowania; opcjonalnie: klik w akord = odsłuchanie jego dźwięków (synteza).
+- **ZREALIZOWANE 2026-09-16** (zakładka 🔀 Transpozycja): dodatkowo wybór zapisu
+  (automatyczny / krzyżyki / bemole), obsługa nazw polskich (Cis, Des, H) i
+  slash-chordów (C/G), „Pokaż pierwszy akord na gryfie”, rozpisane składniki
+  akordów, zapis w localStorage. Testy: 159/159.
 
 ---
 
@@ -351,7 +359,7 @@ elementy oznaczone NEW = nowości względem v1).
 5. Metronom: zwykły tryb → rampa → presety (każdy krok = commit)
 6. Mikrofon: wspólny silnik detekcji pitch + przycisk „Test mikrofonu" →
    moduł 5.6 „znajdź nutę" → moduł 5.7 „słuch" (każdy krok = commit)
-7. Moduł 5.8: transpozycja akordów
+7. ✅ Moduł 5.8: transpozycja akordów (zrobione 2026-09-16)
 8. Poradnik (samouczki + teoria — uwzględnij metronom i moduły mikrofonowe!)
 9. Testy końcowe (smoke + ręcznie, z użytkownikiem, na telefonie)
 
