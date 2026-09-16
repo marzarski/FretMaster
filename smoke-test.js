@@ -420,6 +420,11 @@ ok(pnames()==='BCA', 'presety: strzałka w górę');
   del.onclick();
   ok(pnames()==='BA', 'presety: drugi klik usuwa');
 }
+{
+  const row0=byId.metroPresets.children[0];
+  const grip=(row0.children||[]).find(c=>c._cls&&c._cls.has('grip'));
+  ok(!row0.draggable && grip && grip.draggable===true, 'presety: przeciąganie tylko za uchwyt (kliki bezpieczne)');
+}
 T.saveState();
 ok(JSON.parse(localStorage.getItem('fretmaster.v1')).metro.presets.length===2, 'presety: zapisane w localStorage');
 state.metro.presets=[]; T.buildMetroUI();

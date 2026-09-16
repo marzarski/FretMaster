@@ -144,6 +144,7 @@ input[type=text]:focus{outline:2px solid var(--acc);outline-offset:1px}
 .preset .ord button{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:5px;font-size:10px;padding:1px 7px;cursor:pointer}
 .preset .right{margin-left:auto;display:flex;gap:6px}
 .preset.drag{opacity:.4}
+.preset .grip{cursor:grab;color:var(--muted);padding:6px 4px;user-select:none;font-size:14px;letter-spacing:1px}
 .btn.armed{border-color:var(--bad);color:#ff8a80}
 .btn.big{font-size:16px;padding:12px 28px}
 .mdots{display:flex;gap:12px;margin:16px 0 6px;flex-wrap:wrap}
@@ -1556,7 +1557,7 @@ function metroLoadPreset(i){
 function metroDeletePreset(i, btn){
   if(!btn.classList.contains('armed')){
     btn.classList.add('armed'); btn.textContent='pewny?';
-    setTimeout(()=>{ btn.classList.remove('armed'); if(btn.isConnected) btn.textContent='🗑'; }, 3000);
+    setTimeout(()=>{ btn.classList.remove('armed'); if(btn.isConnected) btn.textContent='🗑'; }, 5000);
     return;
   }
   state.metro.presets.splice(i,1);
@@ -1575,7 +1576,11 @@ function buildMetroPresets(){
   if(!a.length){ const d=el('div','hint'); d.textContent='Brak presetów — ustaw metronom i zapisz pierwszy.'; w.appendChild(d); return; }
   a.forEach((p,i)=>{
     const row=el('div','preset');
-    row.draggable=true; row.dataset.idx=i;
+    row.dataset.idx=i;
+    const grip=el('span','grip'); grip.textContent='\u22EE\u22EE'; grip.title='Przeciągnij, aby zmienić kolejność';
+    grip.draggable=true;
+    grip.ondragstart=e=>{ try{ e.dataTransfer.setData('text/plain', String(i)); }catch(err){} row.classList.add('drag'); };
+    grip.ondragend=()=>row.classList.remove('drag');
     const ord=el('div','ord');
     const up=el('button',''); up.textContent='↑'; up.title='W górę'; up.dataset.act='up'; up.dataset.idx=i;
     up.onclick=()=>metroMovePreset(i,-1);
@@ -1591,9 +1596,7 @@ function buildMetroPresets(){
     const del=el('button','btn'); del.textContent='🗑'; del.title='Usuń preset'; del.dataset.act='del'; del.dataset.idx=i;
     del.onclick=()=>metroDeletePreset(i, del);
     right.appendChild(ld); right.appendChild(del);
-    row.appendChild(ord); row.appendChild(mid); row.appendChild(right);
-    row.ondragstart=e=>{ try{ e.dataTransfer.setData('text/plain', String(i)); }catch(err){} row.classList.add('drag'); };
-    row.ondragend=()=>row.classList.remove('drag');
+    row.appendChild(grip); row.appendChild(ord); row.appendChild(mid); row.appendChild(right);
     row.ondragover=e=>{ e.preventDefault(); };
     row.ondrop=e=>{
       e.preventDefault();

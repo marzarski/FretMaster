@@ -51,5 +51,5 @@ Nazwy strun są w treningu ukryte (bez ściągi); puste struny klikalne jak zwyk
 Trafność i rekordy serii per tryb, rekord sprintu, czas sesji — zapisywane lokalnie (localStorage).
 
 ## 🧪 Testy
-- `node smoke-test.js` — 108 testów smoke (init, CAGED + legenda, trening, sprint, eksplorator, puste struny, ustawienia, master-mute, synteza, metronom + rampa + presety, persystencja),
+- `node smoke-test.js` — 109 testów smoke (init, CAGED + legenda, trening, sprint, eksplorator, puste struny, ustawienia, master-mute, synteza, metronom + rampa + presety, persystencja),
 - poprawność kształtów CAGED weryfikowana: 2340 kombinacji (12 tonów × 5 kształtów × 3 długości gryfu) — 0 błędów.

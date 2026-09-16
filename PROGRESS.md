@@ -47,7 +47,8 @@
     dzwonek, złote kropki) → TRENING (n) w tym samym tempie → START wyżej…
   - [x] metronom: presety (2026-09-11): zapis pod nazwą, pełna konfiguracja,
     wczytywanie, usuwanie na 2 kliki, kolejność strzałki + drag&drop;
-    testy → 108 OK
+    fix: DnD tylko za uchwyt ⋮⋮ (wiersz zjadał kliki), rozbrojenie 5 s;
+    testy → 109 OK
   - [x] lepszy dźwięk gitary (HANDOFF §5.3, 2026-09-11): poprawny KS,
     rezonans pudła, stereo, kompresor; 8 testów DSP (37→45 OK).
     Iteracja 2 (feedback: bardziej gitarowo, góra cichsza, dłużej): drugi
@@ -132,6 +133,8 @@
   planowane na granicy uderzeń (lookahead) — dwa poziomy planowania.
 - **Modale w iframe**: `prompt`/`confirm` mogą być blokowane w podglądzie —
   preset: nazwa przez input, usuwanie na 2 kliki (arm), bez modali.
+- **DnD zjada kliki**: `draggable` na całym wierszu pożera kliknięcia w jego
+  przyciski (zwłaszcza Firefox i dotyk) — przeciąganie tylko za uchwyt.
 
 ## Błędy z testów na żywo (podgląd w czacie)
 - 2026-09-11, mute: użytkownik widzi przycisk, ikona zmienia się 🔊/🔇 (tak),
