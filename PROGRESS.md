@@ -147,8 +147,11 @@
 - **Git: lokalny ref brancha może zgubić historię między turami** (pliki
   zostają, HEAD wraca do bazy; zdarzyło się 2×) — wtedy NIE commitować na
   starym HEAD (robi się rozjazd). Recepta: `git fetch origin <branch>` →
-  `git reset --soft FETCH_HEAD` (drzewo zostaje, HEAD na remote) → sprawdzić,
-  że `git diff --cached` to tylko bieżąca zmiana → commit → push.
+  `git reset --soft FETCH_HEAD` (drzewo zostaje, HEAD na remote) → **KONIECZNIE
+  `git add -A`** (indeks bywa niepełny — commit bez tego spina śmieci i kasuje
+  pliki na remote!) → sprawdzić, że `git diff --cached` to TYLKO bieżąca
+  zmiana (mały diff!) → commit → push. Awaryjnie (zły commit już na remote):
+  naprawić lokalnie i `git push --force-with-lease=<branch>:<SHA z ls-remote>`.
   Dlatego: **push po każdej turze ze zmianami** (remote = prawda).
 
 ## Tuner — spec (pomysł użytkownika 2026-09-11; budowa po kroku 5)
