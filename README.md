@@ -45,10 +45,11 @@ Nazwy strun są w treningu ukryte (bez ściągi); puste struny klikalne jak zwyk
 - Tempo 20–300 BPM, metrum do wpisania (2–16 uderzeń na takt), kropki = uderzenia (1. akcentowane),
 - klik w kropkę wycisza uderzenie (maska zapisywana); metronom gra dalej po zmianie zakładki (miga w nagłówku).
 - Rampa: Start (s taktów, dzwonek) → Trening (n taktów) w tym samym tempie; każdy Start szybszy o przyrost liniowo od bazy; max (trzymaj/stop/restart); wizualizacja.
+- Presety: zapis pod nazwą, wczytywanie, usuwanie (2 kliki), kolejność (strzałki/przeciąganie).
 
 ## 📊 Statystyki
 Trafność i rekordy serii per tryb, rekord sprintu, czas sesji — zapisywane lokalnie (localStorage).
 
 ## 🧪 Testy
-- `node smoke-test.js` — 97 testów smoke (init, CAGED + legenda, trening, sprint, eksplorator, puste struny, ustawienia, master-mute, synteza, metronom + rampa, persystencja),
+- `node smoke-test.js` — 108 testów smoke (init, CAGED + legenda, trening, sprint, eksplorator, puste struny, ustawienia, master-mute, synteza, metronom + rampa + presety, persystencja),
 - poprawność kształtów CAGED weryfikowana: 2340 kombinacji (12 tonów × 5 kształtów × 3 długości gryfu) — 0 błędów.

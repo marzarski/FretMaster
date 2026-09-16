@@ -135,6 +135,16 @@ th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4p
 .mbpm small{font-size:14px;color:var(--muted);font-weight:600}
 input.num{width:74px;text-align:center;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--txt);font-size:14px}
 input.num:focus{outline:2px solid var(--acc);outline-offset:1px}
+input[type=text]{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;color:var(--txt);font-size:14px}
+input[type=text]:focus{outline:2px solid var(--acc);outline-offset:1px}
+.preset{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.preset .nm{font-weight:700;font-size:14px}
+.preset .ds{font-size:12px;color:var(--muted)}
+.preset .ord{display:flex;flex-direction:column;gap:2px}
+.preset .ord button{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:5px;font-size:10px;padding:1px 7px;cursor:pointer}
+.preset .right{margin-left:auto;display:flex;gap:6px}
+.preset.drag{opacity:.4}
+.btn.armed{border-color:var(--bad);color:#ff8a80}
 .btn.big{font-size:16px;padding:12px 28px}
 .mdots{display:flex;gap:12px;margin:16px 0 6px;flex-wrap:wrap}
 .mdot{width:38px;height:38px;border-radius:50%;background:var(--panel2);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer;user-select:none}
@@ -280,6 +290,15 @@ input.num:disabled,.btn:disabled{opacity:.5}
     <div class="flow" id="metroFlow"></div>
     <div class="mphase" id="metroPhase"></div>
     <p class="hint">Rampa gra na przemian: <b>Start</b> (dzwonek) → <b>Trening</b> — oba w tym samym tempie. Każdy kolejny Start jest szybszy o przyrost (<b>liniowo od bazy</b>: 80.8, 81.6, 82.4…). Maska wyciszonych uderzeń działa przez całą rampę.</p>
+  </div>
+  <div class="panel">
+    <h2>Presety ćwiczeń</h2>
+    <div id="metroPresets"></div>
+    <div class="row" style="margin-top:10px">
+      <input type="text" id="metroPresetName" placeholder="Nazwa presetu…" maxlength="40" autocomplete="off" style="flex:1;min-width:180px">
+      <button class="btn primary" id="metroPresetSave">＋ Zapisz bieżące ustawienia</button>
+    </div>
+    <p class="hint">Kolejność zmieniasz strzałkami (góra/dół) lub przeciąganiem. Preset zapisuje: tryb, metrum, wyciszenia, tempo, przyrost, n, s, tempo max i zachowanie na limicie.</p>
   </div>
 </section>
 
@@ -1502,11 +1521,93 @@ function buildMetroUI(){
   $('metroEnd').value=m.endMode;
   buildMetroDots();
   buildMetroFlow();
+  buildMetroPresets();
   refreshMetroLive();
   metroBarUI();
 }
+function metroPresetDesc(p){
+  const mutes=[];
+  (p.mask||[]).forEach((mm,i)=>{ if(mm) mutes.push(i+1); });
+  const muteTxt = mutes.length? ' · wyciszone: '+mutes.join(', ') : '';
+  if(p.mode==='rampa'){
+    const st = p.stepType==='bpm' ? '+'+p.step+' BPM' : '+'+p.step+'%';
+    return 'rampa '+p.base+'→'+p.max+' · '+st+' · '+p.beats+'/4 · start ×'+p.s+', trening ×'+p.n+muteTxt;
+  }
+  return 'zwykły · '+p.bpm+' BPM · '+p.beats+'/4'+muteTxt;
+}
+function metroSavePreset(){
+  const inp=$('metroPresetName');
+  const name=(inp.value||'').trim().slice(0,40);
+  if(!name) return false;
+  const m=state.metro;
+  m.presets.push({name, mode:m.mode, bpm:m.bpm, base:m.base, beats:m.beats, mask:m.mask.slice(), stepType:m.stepType, step:m.step, n:m.n, s:m.s, max:m.maxBpm, end:m.endMode});
+  inp.value='';
+  saveState(); buildMetroPresets();
+  return true;
+}
+function metroLoadPreset(i){
+  const p=state.metro.presets[i]; if(!p) return;
+  if(Metro.playing) metroStop();
+  const m=state.metro;
+  m.mode=p.mode; m.bpm=p.bpm; m.base=p.base; m.beats=p.beats; m.mask=(p.mask||[]).slice();
+  m.stepType=p.stepType; m.step=p.step; m.n=p.n; m.s=(p.s!==undefined?p.s:2); m.maxBpm=p.max; m.endMode=p.end;
+  metroNormalize(); saveState(); buildMetroUI();
+}
+function metroDeletePreset(i, btn){
+  if(!btn.classList.contains('armed')){
+    btn.classList.add('armed'); btn.textContent='pewny?';
+    setTimeout(()=>{ btn.classList.remove('armed'); if(btn.isConnected) btn.textContent='🗑'; }, 3000);
+    return;
+  }
+  state.metro.presets.splice(i,1);
+  saveState(); buildMetroPresets();
+}
+function metroMovePreset(i, dir){
+  const a=state.metro.presets, j=i+dir;
+  if(j<0||j>=a.length) return;
+  const t=a[i]; a[i]=a[j]; a[j]=t;
+  saveState(); buildMetroPresets();
+}
+function buildMetroPresets(){
+  const w=$('metroPresets'); if(!w) return;
+  w.innerHTML='';
+  const a=state.metro.presets;
+  if(!a.length){ const d=el('div','hint'); d.textContent='Brak presetów — ustaw metronom i zapisz pierwszy.'; w.appendChild(d); return; }
+  a.forEach((p,i)=>{
+    const row=el('div','preset');
+    row.draggable=true; row.dataset.idx=i;
+    const ord=el('div','ord');
+    const up=el('button',''); up.textContent='↑'; up.title='W górę'; up.dataset.act='up'; up.dataset.idx=i;
+    up.onclick=()=>metroMovePreset(i,-1);
+    const dn=el('button',''); dn.textContent='↓'; dn.title='W dół'; dn.dataset.act='down'; dn.dataset.idx=i;
+    dn.onclick=()=>metroMovePreset(i,1);
+    ord.appendChild(up); ord.appendChild(dn);
+    const mid=el('div',''); const nm=el('div','nm'); nm.textContent=p.name;
+    const ds=el('div','ds'); ds.textContent=metroPresetDesc(p);
+    mid.appendChild(nm); mid.appendChild(ds);
+    const right=el('div','right');
+    const ld=el('button','btn'); ld.textContent='Załaduj'; ld.dataset.act='load'; ld.dataset.idx=i;
+    ld.onclick=()=>metroLoadPreset(i);
+    const del=el('button','btn'); del.textContent='🗑'; del.title='Usuń preset'; del.dataset.act='del'; del.dataset.idx=i;
+    del.onclick=()=>metroDeletePreset(i, del);
+    right.appendChild(ld); right.appendChild(del);
+    row.appendChild(ord); row.appendChild(mid); row.appendChild(right);
+    row.ondragstart=e=>{ try{ e.dataTransfer.setData('text/plain', String(i)); }catch(err){} row.classList.add('drag'); };
+    row.ondragend=()=>row.classList.remove('drag');
+    row.ondragover=e=>{ e.preventDefault(); };
+    row.ondrop=e=>{
+      e.preventDefault();
+      let from=-1; try{ from=parseInt(e.dataTransfer.getData('text/plain'),10); }catch(err){}
+      if(isNaN(from)||from===i) return;
+      const it=a.splice(from,1)[0]; a.splice(i,0,it);
+      saveState(); buildMetroPresets();
+    };
+    w.appendChild(row);
+  });
+}
 function bindMetro(){
   $('metroStart').onclick=()=>{ Metro.playing?metroStop():metroStart(); };
+  $('metroPresetSave').onclick=()=>metroSavePreset();
   const setBpm=v=>{ v=Math.min(300,Math.max(20,Math.round(+v)||state.metro.bpm)); state.metro.bpm=v; saveState(); buildMetroUI(); };
   $('metroBpm').onchange=e=>setBpm(e.target.value);
   $('metroMinus').onclick=()=>setBpm(state.metro.bpm-1);

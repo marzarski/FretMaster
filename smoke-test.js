@@ -5,7 +5,7 @@ const path = require('path');
 const html = fs.readFileSync(path.join(__dirname, 'index.html'),'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 // eksport dla testów (nie zmienia zachowania aplikacji)
-script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn,ksString,addEarlyRef,applyFades,startQuestionAt,addTrainerDot,Metro,metroNormalize,metroMuted,metroStart,metroStop,metroFlash,buildMetroUI,buildMetroDots,bindMetro,metroFmtT,metroRampTempo,metroRampNext,metroOnBar,buildMetroFlow,refreshMetroLive,metroPhaseLabel,metroBell};';
+script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn,ksString,addEarlyRef,applyFades,startQuestionAt,addTrainerDot,Metro,metroNormalize,metroMuted,metroStart,metroStop,metroFlash,buildMetroUI,buildMetroDots,bindMetro,metroFmtT,metroRampTempo,metroRampNext,metroOnBar,buildMetroFlow,refreshMetroLive,metroPhaseLabel,metroBell,metroPresetDesc,metroSavePreset,metroLoadPreset,metroDeletePreset,metroMovePreset,buildMetroPresets};';
 
 class EL {
   constructor(tag){ this.tagName=(tag||'div').toUpperCase(); this.children=[]; this.style={}; this.dataset={};
@@ -50,7 +50,8 @@ function reg(id, tag){ const e=new EL(tag||'div'); e.id=id; byId[id]=e; return e
  'sprintOverlay','sprintScore','sprintBestLine','sprintAgain','sprintClose','statGrid','statTable','sesLine','btnResetStats',
  'selInstrument','selTuning','selFrets','selLh','stringRow','selTrainFrets','selTrainSource','selLimit','chkSound','chkNames','selLang','btnMute',
  'metroDots','metroBpmDisp','metroBpm','metroBeats','metroStart','metroMinus','metroPlus','metroBar',
- 'metroModeSimple','metroModeRamp','metroRampPanel','metroBase','metroStepPct','metroStepBpm','metroStep','metroN','metroS','metroMax','metroEnd','metroFlow','metroPhase']
+ 'metroModeSimple','metroModeRamp','metroRampPanel','metroBase','metroStepPct','metroStepBpm','metroStep','metroN','metroS','metroMax','metroEnd','metroFlow','metroPhase',
+ 'metroPresets','metroPresetName','metroPresetSave']
  .forEach(id=>reg(id, id.startsWith('sel')?'select':(id.startsWith('chk')?'input':'div')));
 
 const body = new EL('body');
@@ -377,6 +378,51 @@ T.Metro.playing=false; T.Metro.phase='start'; T.Metro.phaseBar=0; T.Metro.kTrain
 state.metro.mode='simple'; state.metro.n=4; state.metro.s=2; state.metro.base=80; state.metro.maxBpm=120;
 state.metro.step=1; state.metro.stepType='pct'; state.metro.endMode='hold';
 T.buildMetroUI();
+console.log('— metronom: presety —');
+state.metro.presets=[]; T.buildMetroPresets();
+byId.metroPresetName.value='';
+byId.metroPresetSave.onclick();
+ok(state.metro.presets.length===0, 'presety: pusta nazwa ignorowana');
+byId.metroModeRamp.onclick();
+byId.metroBeats.value='7'; byId.metroBeats.onchange({target:byId.metroBeats});
+byId.metroBase.value='90'; byId.metroBase.onchange({target:byId.metroBase});
+byId.metroDots.children[0].onclick();
+byId.metroPresetName.value='Testowy';
+byId.metroPresetSave.onclick();
+ok(state.metro.presets.length===1 && state.metro.presets[0].name==='Testowy', 'presety: zapis pod nazwą');
+{
+  const P=state.metro.presets[0];
+  ok(P.mode==='rampa'&&P.beats===7&&P.base===90&&P.mask[0]===true, 'presety: zapis pełnej konfiguracji');
+  byId.metroDots.children[0].onclick();
+  ok(P.mask[0]===true && state.metro.mask[0]===false, 'presety: maska kopiowana (nie referencja)');
+  ok(T.metroPresetDesc(P).includes('90') && T.metroPresetDesc(P).includes('7/4'), 'presety: czytelny opis');
+}
+function findBtn(root, act, idx){
+  const out=[];
+  const walk=n=>{ (n.children||[]).forEach(c=>{ if(c.tagName==='BUTTON'&&c.dataset&&c.dataset.act===act&&(idx===undefined||+c.dataset.idx===idx)) out.push(c); walk(c); }); };
+  walk(root); return out;
+}
+byId.metroModeSimple.onclick();
+byId.metroBeats.value='4'; byId.metroBeats.onchange({target:byId.metroBeats});
+findBtn(byId.metroPresets,'load',0)[0].onclick();
+ok(state.metro.mode==='rampa'&&state.metro.beats===7&&state.metro.base===90&&byId.metroDots.children.length===7, 'presety: wczytanie odtwarza konfigurację');
+state.metro.presets=[]; T.buildMetroPresets();
+['A','B','C'].forEach(n=>{ byId.metroPresetName.value=n; byId.metroPresetSave.onclick(); });
+const pnames=()=>state.metro.presets.map(p=>p.name).join('');
+findBtn(byId.metroPresets,'down',0)[0].onclick();
+ok(pnames()==='BAC', 'presety: strzałka w dół');
+findBtn(byId.metroPresets,'up',2)[0].onclick();
+ok(pnames()==='BCA', 'presety: strzałka w górę');
+{
+  const del=findBtn(byId.metroPresets,'del',1)[0];
+  del.onclick();
+  ok(state.metro.presets.length===3 && del.textContent==='pewny?', 'presety: pierwszy klik uzbraja');
+  del.onclick();
+  ok(pnames()==='BA', 'presety: drugi klik usuwa');
+}
+T.saveState();
+ok(JSON.parse(localStorage.getItem('fretmaster.v1')).metro.presets.length===2, 'presety: zapisane w localStorage');
+state.metro.presets=[]; T.buildMetroUI();
 console.log('— persystencja —');
 T.saveState();
 const saved = JSON.parse(localStorage.getItem('fretmaster.v1'));

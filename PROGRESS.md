@@ -45,6 +45,9 @@
     max (hold/stop/restart), wizualizacja, czysta maszynka faz.
     Iteracja 2 (feedback): rezygnacja z przygotowania; cykl START (s taktów,
     dzwonek, złote kropki) → TRENING (n) w tym samym tempie → START wyżej…
+  - [x] metronom: presety (2026-09-11): zapis pod nazwą, pełna konfiguracja,
+    wczytywanie, usuwanie na 2 kliki, kolejność strzałki + drag&drop;
+    testy → 108 OK
   - [x] lepszy dźwięk gitary (HANDOFF §5.3, 2026-09-11): poprawny KS,
     rezonans pudła, stereo, kompresor; 8 testów DSP (37→45 OK).
     Iteracja 2 (feedback: bardziej gitarowo, góra cichsza, dłużej): drugi
@@ -127,6 +130,8 @@
 - **Rampa: tempa zaokrąglane do 0.1** (`metroRampTempo`) — inaczej float daje
   80.80000001; fazy liczone na granicach taktów (`metroOnBar`), a dźwięki
   planowane na granicy uderzeń (lookahead) — dwa poziomy planowania.
+- **Modale w iframe**: `prompt`/`confirm` mogą być blokowane w podglądzie —
+  preset: nazwa przez input, usuwanie na 2 kliki (arm), bez modali.
 
 ## Błędy z testów na żywo (podgląd w czacie)
 - 2026-09-11, mute: użytkownik widzi przycisk, ikona zmienia się 🔊/🔇 (tak),
@@ -162,7 +167,7 @@
 - [x] 1. PWA: manifest, ikony, **GitHub Pages** ✓ (działa: marzarski.github.io/FretMaster/)
 - [x] 2. Master-mute ✓
 - [x] 3. Lepszy dźwięk gitary ✓ (zaakceptowany przez użytkownika)
-- [ ] 4. Metronom: zwykły ✓ → rampa ✓ (2026-09-11) → presety
+- [x] 4. Metronom ✓ (zwykły + rampa + presety, 2026-09-11)
 - [ ] 5. Mikrofon: silnik pitch + „Test mikrofonu" → „znajdź nutę" → „słuch"
 - [ ] 5b. 🎚️ Tuner do strojenia gitary (pomysł użytkownika 2026-09-11 —
   po silniku pitch z kroku 5; spec: PROGRESS „Tuner — spec”)
