@@ -48,7 +48,7 @@
   - [x] metronom: presety (2026-09-11): zapis pod nazwą, pełna konfiguracja,
     wczytywanie, usuwanie na 2 kliki, kolejność strzałki + drag&drop;
     fix: DnD tylko za uchwyt ⋮⋮ (wiersz zjadał kliki), rozbrojenie 5 s;
-    testy → 109 OK
+    testy → 109 OK. **Zaakceptowane przez użytkownika — metronom KOMPLETNY.**
   - [x] lepszy dźwięk gitary (HANDOFF §5.3, 2026-09-11): poprawny KS,
     rezonans pudła, stereo, kompresor; 8 testów DSP (37→45 OK).
     Iteracja 2 (feedback: bardziej gitarowo, góra cichsza, dłużej): drugi
