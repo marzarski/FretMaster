@@ -5,7 +5,7 @@ const path = require('path');
 const html = fs.readFileSync(path.join(__dirname, 'index.html'),'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 // eksport dla testów (nie zmienia zachowania aplikacji)
-script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn,ksString,addEarlyRef,applyFades,startQuestionAt,addTrainerDot,Metro,metroNormalize,metroMuted,metroStart,metroStop,metroFlash,buildMetroUI,buildMetroDots,bindMetro,metroFmtT,metroRampTempo,metroRampNext,metroOnBar,buildMetroFlow,refreshMetroLive,metroPhaseLabel,metroBell,metroPresetDesc,metroSavePreset,metroLoadPreset,metroDeletePreset,metroMovePreset,buildMetroPresets};';
+script += '\n;globalThis.__T={state,TrainState,GEO:()=>GEO,currentTab:()=>currentTab,setTab:t=>{currentTab=t;},refreshBoard,renderBoard,buildSettings,buildKeyRow,buildSelects,buildPad,bindSettings,syncExplorerChecks,buildModeRow,buildLegend,renderTrainerBoard,renderTrainerView,renderTStats,renderStats,startTraining,stopTraining,startQuestion,answerName,clickTrainerCell,skipQuestion,allowedCells,cellPc,cellMidi,trainFretMax,pcDisp,maxFret,stringsCount,saveState,loadState,modeLimit,record,reveal,afterAnswer,timeoutFail,soundOn,setMuted,updateMuteBtn,ksString,addEarlyRef,applyFades,startQuestionAt,addTrainerDot,Metro,metroNormalize,metroMuted,metroStart,metroStop,metroFlash,buildMetroUI,buildMetroDots,bindMetro,metroFmtT,metroRampTempo,metroRampNext,metroOnBar,buildMetroFlow,refreshMetroLive,metroPhaseLabel,metroBell,metroPresetDesc,metroSavePreset,metroLoadPreset,metroDeletePreset,metroMovePreset,buildMetroPresets,parseChord,parseSeq,transpChord,transpShiftToTarget,transpModel,transpNormalize,renderTransp,transpResultText,bindTransp,transpShowBoard,namePc,accidentalPref,playChordPc,switchTab,toast};';
 
 class EL {
   constructor(tag){ this.tagName=(tag||'div').toUpperCase(); this.children=[]; this.style={}; this.dataset={};
@@ -51,18 +51,22 @@ function reg(id, tag){ const e=new EL(tag||'div'); e.id=id; byId[id]=e; return e
  'selInstrument','selTuning','selFrets','selLh','stringRow','selTrainFrets','selTrainSource','selLimit','chkSound','chkNames','selLang','btnMute',
  'metroDots','metroBpmDisp','metroBpm','metroBeats','metroStart','metroMinus','metroPlus','metroBar',
  'metroModeSimple','metroModeRamp','metroRampPanel','metroBase','metroStepPct','metroStepBpm','metroStep','metroN','metroS','metroMax','metroEnd','metroFlow','metroPhase',
- 'metroPresets','metroPresetName','metroPresetSave']
+ 'metroPresets','metroPresetName','metroPresetSave',
+ 'transpSeq','transpTarget','transpShift','transpMinus','transpPlus','transpReset','transpAccAuto','transpAccSharp','transpAccFlat',
+ 'optSemis','optTarget','transpTargetInfo','transpResult','transpList','transpCopy','transpPlay','transpStop','transpShowBoard',
+ 'guideSearch','guideResetRead','guideProgress','guideToc','guideArt']
  .forEach(id=>reg(id, id.startsWith('sel')?'select':(id.startsWith('chk')?'input':'div')));
 
 const body = new EL('body');
 const header = new EL('header'); const nav = new EL('nav');
-['board','train','stats','settings'].forEach(t=>{ const b=new EL('button'); b._cls.add('tab-btn'); b.dataset.tab=t; nav.appendChild(b); });
+['board','train','stats','transp','guide','settings'].forEach(t=>{ const b=new EL('button'); b._cls.add('tab-btn'); b.dataset.tab=t; nav.appendChild(b); });
 header.appendChild(nav); body.appendChild(header);
 const main = new EL('main');
-['board','train','stats','settings'].forEach(t=>{ const s=new EL('section'); s.id='tab-'+t; if(t==='board') s._cls.add('active'); main.appendChild(s); });
+['board','train','stats','transp','guide','settings'].forEach(t=>{ const s=new EL('section'); s.id='tab-'+t; byId[s.id]=s; if(t==='board') s._cls.add('active'); main.appendChild(s); });
 body.appendChild(main);
 
 const document = {
+  body: body,
   getElementById: id => byId[id] || null,
   createElement: t => new EL(t),
   createTextNode: t => textNode(t),
@@ -428,6 +432,130 @@ ok(pnames()==='BCA', 'presety: strzałka w górę');
 T.saveState();
 ok(JSON.parse(localStorage.getItem('fretmaster.v1')).metro.presets.length===2, 'presety: zapisane w localStorage');
 state.metro.presets=[]; T.buildMetroUI();
+
+console.log('— transpozycja: parser akordów —');
+{
+  const c=T.parseChord('C');   ok(c.ok && c.root===0 && c.suffix==='', 'parser: „C” = C dur (root 0, brak jakości)');
+  const c2=T.parseChord('Am7'); ok(c2.ok && c2.root===9 && c2.quality==='min7', 'parser: „Am7” = A m7');
+  const c3=T.parseChord('Bb9'); ok(c3.ok && c3.root===10 && c3.quality==='nine', 'parser: „Bb9” = Bb 9 (B = Bb)');
+  const c4=T.parseChord('H7');  ok(c4.ok && c4.root===11 && c4.quality==='dom7', 'parser: „H7” = H 7 (H = B naturalne)');
+  const c5=T.parseChord('Cis'); ok(c5.ok && c5.root===1, 'parser: „Cis” = C# (polski zapis)');
+  const c6=T.parseChord('Des'); ok(c6.ok && c6.root===1 && c6.quality==='maj', 'parser: „Des” = Db (polski zapis)');
+  const c7=T.parseChord('C/G'); ok(c7.ok && c7.root===0 && c7.bass===7, 'parser: „C/G” = bas G');
+  const c8=T.parseChord('X7');  ok(c8 && c8.ok===false && /nierozpoznana nazwa/.test(c8.error), 'parser: „X7” → czytelny błąd');
+  const c9=T.parseChord('Cxyz');ok(c9 && c9.ok===false && /jakość/.test(c9.error), 'parser: „Cxyz” → błąd jakości');
+}
+
+console.log('— transpozycja: o półtony (opcja A) —');
+state.transp.target=''; state.transp.acc='auto'; state.transp.shift=3;
+state.transp.seq='C A D G';
+ok(T.transpResultText()==='D# C F A#', 'opcja A: C A D G o +3 → D# C F A# (przykład z HANDOFF §5.8)');
+state.transp.shift=1;
+ok(T.transpResultText().split(' ')[0]==='C#', 'auto-zapis: w górę → krzyżyki (C+1 = C#)');
+state.transp.shift=-1;
+ok(T.transpResultText().split(' ')[0]==='B', 'auto-zapis: w dół → bemole (C−1 = B)');
+state.transp.acc='flat'; state.transp.shift=1;
+ok(T.transpResultText().split(' ')[0]==='Db', 'wymuszone bemole: C+1 = Db');
+state.transp.acc='sharp'; state.transp.shift=-1;
+ok(T.transpResultText().split(' ')[0]==='B', 'wymuszone krzyżyki: C−1 = B (w zapisie krzyżykowym B = B naturalne)');
+state.transp.acc='auto';
+state.transp.seq='Cm D7 Bb9 Am7 Cmaj7 Fsus4 H7 Cis C/G'; state.transp.shift=2;
+ok(T.transpResultText()==='Dm E7 C9 Bm7 Dmaj7 Gsus4 C#7 D# D/A',
+   'jakości i bas zachowane: '+T.transpResultText());
+state.transp.seq='C Am F G'; state.transp.shift=12;
+ok(T.transpResultText()==='C Am F G', '+12 (oktawa) = te same nazwy');
+
+console.log('— transpozycja: do podanego akordu (opcja B) —');
+state.transp.acc='auto';
+state.transp.seq='C A D G'; state.transp.target='F'; state.transp.shift=0;
+ok(T.transpShiftToTarget(0,5)===5, 'C→F = +5 półtonów');
+ok(T.transpResultText()==='F D G C', 'opcja B: C A D G → F D G C (reguła §5.8: cała sekwencja +5; przykład w HANDOFF ma literówkę „Bb”)');
+state.transp.target='Bb';
+ok(T.transpShiftToTarget(0,10)===-2, 'C→Bb liczone najkrótszą drogą (−2, nie +10)');
+ok(T.transpResultText()==='Bb G C F', 'opcja B w dół: C A D G → Bb G C F (−2)');
+state.transp.target='H';
+ok(T.transpResultText()==='B Ab Db Gb', 'opcja B z celem H (= B naturalne): −1 → zapis bemolowy (B, Ab, Db, Gb)');
+state.transp.target='Am';
+ok(T.transpResultText()==='A Gb B E', 'opcja B: cel Am → −3 (A, Gb, B, E) — jakość zostaje, tonika jedzie');
+state.transp.target='C#';
+ok(T.transpResultText()==='C# A# D# G#', 'opcja B: cel C# → +1, zapis krzyżykowy');
+state.transp.target='qq';
+T.renderTransp();
+{ const M=T.transpModel();
+  ok(M.targetMode===false && /Nie rozpoznano/.test(byId.transpTargetInfo.textContent),
+     'błędny cel → powrót do opcji A + komunikat'); }
+state.transp.target='';
+
+console.log('— transpozycja: UI, odsłuch i „pokaż na gryfie” —');
+state.transp.acc='auto'; state.transp.target='';
+state.transp.seq='C Am F G'; state.transp.shift=0;
+T.renderTransp();
+ok(byId.transpResult.children.filter(c=>c._cls.has('chip')).length===4, 'wynik: 4 klikalne akordy');
+ok(byId.optSemis._cls.has('active') && !byId.optTarget._cls.has('active'), 'opcja A aktywna, gdy pole celu puste');
+ok(byId.transpPlus.disabled===false, 'przyciski półtonów aktywne w opcji A');
+byId.transpPlus.onclick(); byId.transpPlus.onclick();
+ok(state.transp.shift===2 && byId.transpShift.textContent==='+2', 'przycisk + podbija o półton i pokazuje „+2”');
+byId.transpMinus.onclick();
+ok(state.transp.shift===1, 'przycisk − obniża o półton');
+byId.transpReset.onclick();
+ok(state.transp.shift===0, '„zeruj” wraca do 0');
+byId.transpSeq.value='D G A'; byId.transpSeq.oninput({target:byId.transpSeq});
+ok(state.transp.seq==='D G A' && byId.transpResult.children.filter(c=>c._cls.has('chip')).length===3,
+   'zmiana sekwencji przelicza wynik');
+byId.transpTarget.value='E'; byId.transpTarget.oninput({target:byId.transpTarget});
+ok(byId.optTarget._cls.has('active') && byId.transpPlus.disabled===true,
+   'wpisany cel → opcja B aktywna, półtony zablokowane');
+ok(T.transpResultText()==='E A B', 'opcja B w UI: D G A → E A B (+2)');
+byId.transpTarget.value=''; byId.transpTarget.oninput({target:byId.transpTarget});
+byId.transpSeq.value='C Am F G'; byId.transpSeq.oninput({target:byId.transpSeq});
+byId.transpShift.textContent=''; T.renderTransp();
+const chips=byId.transpResult.children.filter(c=>c._cls.has('chip'));
+ok(chips.length===4 && typeof chips[1].onclick==='function', 'klik w akord wyniku = odsłuch (handler podpięty)');
+chips[1].onclick();
+ok(true, 'odsłuch akordu nie wyrzuca błędu');
+byId.transpPlay.onclick(); byId.transpStop.onclick();
+ok(true, 'odsłuch całej sekwencji + stop działają');
+byId.transpCopy.onclick();
+ok(true, 'kopiowanie wyniku nie wyrzuca błędu');
+byId.transpShowBoard.onclick();
+ok(state.explorer.key===0 && state.explorer.chord==='maj' && T.currentTab()==='board',
+   '„pokaż na gryfie”: pierwszy akord C → tonacja C, akord dur, zakładka Gryf');
+ok(state.explorer.show.chord===true && state.explorer.show.scale===false,
+   '„pokaż na gryfie”: włączone dźwięki akordu, wyłączona skala');
+byId.transpSeq.value='Am'; byId.transpSeq.oninput({target:byId.transpSeq});
+byId.transpShowBoard.onclick();
+ok(state.explorer.key===9 && state.explorer.chord==='min',
+   '„pokaż na gryfie” dla Am: tonacja A, akord mol');
+byId.transpSeq.value='C Am F G'; byId.transpSeq.oninput({target:byId.transpSeq});
+state.settings.noteLang='pl'; state.transp.acc='auto'; state.transp.shift=0;
+ok(T.transpResultText()==='C Am F G', 'język polski: sekwencja bez zmian przy przesunięciu 0');
+state.transp.shift=1;
+ok(T.transpResultText()==='Cis Aism Fis Gis', 'język polski (auto, +1): Cis, Aism, Fis, Gis');
+state.transp.acc='flat';
+ok(T.transpResultText()==='Ces Bm Ges As', 'język polski (bemole, +1): Ces, Bm (= Bb), Ges, As');
+state.transp.acc='auto'; state.transp.shift=-1;
+ok(T.transpResultText()==='H Asm E Ges', 'język polski (auto, −1): H, Asm, E, Ges');
+state.transp.shift=0; state.settings.noteLang='en';
+ok(T.parseSeq('C# A#').chords.map(c=>c.root).join()==='1,10', 'pisownia wejścia: C# i A# rozpoznane');
+state.transp.seq='C# A#';
+ok(T.transpResultText()==='C# A#', 'przy przesunięciu 0 pisownia wejścia zostaje (C# A#)');
+state.transp.acc='flat';
+ok(T.transpResultText()==='Db Bb', 'te same dźwięki jako Db Bb przy wymuszonych bemolach');
+state.transp.acc='auto'; state.transp.seq='C Am F G';
+T.switchTab('transp');
+ok(T.currentTab()==='transp' && byId['tab-transp']._cls.has('active') && !byId['tab-board']._cls.has('active'),
+   'switchTab przełącza sekcje i zakładki');
+
+console.log('— transpozycja: persystencja —');
+state.transp.seq='C Am F G'; state.transp.target='F'; state.transp.shift=0;
+T.saveState();
+ok(JSON.parse(localStorage.getItem('fretmaster.v1')).transp.target==='F', 'transpozycja zapisana w localStorage');
+state.transp.target=''; state.transp.seq='X';
+T.loadState();
+ok(state.transp.target==='F' && state.transp.seq==='C Am F G', 'wczytanie stanu odtwarza sekwencję i cel');
+state.transp.target=''; state.transp.seq='C Am F G'; state.transp.shift=0;
+T.renderTransp();
+
 console.log('— persystencja —');
 T.saveState();
 const saved = JSON.parse(localStorage.getItem('fretmaster.v1'));

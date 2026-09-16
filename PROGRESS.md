@@ -18,12 +18,21 @@
   `tools/make-icons.sh`, ImageMagick, paleta z `:root`). Rejestracja SW tylko
   przy https/localhost — **`file://` nadal działa normalnie** (wymóg z HANDOFF 5.5).
   Testy po zmianach: 29/29 OK.
-- **Sesja 2026-09-16 (chat `arena/01a0a9be-fretmaster`)**: zweryfikowano stan
-  startowy — PR #2 scalony (`main` = c5e877f), `node smoke-test.js` → **109 OK,
-  0 FAIL**, drzewo czyste. Na prośbę użytkownika dopisano do `HANDOFF.md`
-  **dział 1B „Jak działa praca w Arenie (cykl sesji)”** + pułapki tutaj
-  (podgląd bez mikrofonu; scalenie PR-a = zamknięcie sesji → nowy czat z
-  podpiętym repo). Kodu apki nie ruszano.
+- **Sesja 2026-09-16 (chat `arena/01a0a9be-fretmaster`) — paczka v3 w trakcie**:
+  zweryfikowano stan startowy (PR #2 scalony, `main` = c5e877f, 109/109).
+  Użytkownik zmienił kolejność planu: **najpierw krok 6 (Transpozycja) i 7
+  (Poradnik), mikrofon (5) i tuner (5b) na końcu paczki** — bo mikrofon i tak
+  da się przetestować dopiero na Pages.
+  - [x] `HANDOFF.md` §1B „Jak działa praca w Arenie” (commit `568734a`)
+  - [x] **krok 6: moduł 🔀 Transpozycja akordów** — nowa zakładka, parser akordów
+        (EN + PL, `H`=B naturalne, `B`=Bb, `is/es/#/b`, slash-chordy `C/G`),
+        opcja A (półtony −12…+12, zapis auto/#/♭), opcja B (cel = pierwszy akord,
+        przesunięcie najkrótszą drogą −6…+6), wynik klikalny = odsłuch (arpeggio),
+        „Odsłuchaj całą sekwencję”, „Kopiuj wynik”, **„Pokaż pierwszy akord na
+        gryfie”** (ustawia tonację + akord w eksploratorze i przełącza zakładkę),
+        rozpisane składniki każdego akordu, stan w localStorage.
+        Testy: **159 OK, 0 FAIL** (+50 nowych).
+  - [ ] krok 7: Poradnik (następny w tej sesji)
 - **Krok 1 ZAMKNIĘTY W CAŁOŚCI (2026-09-11)**: GitHub Pages DZIAŁA pod
   https://marzarski.github.io/FretMaster/ — repo publiczne, PR #1 scalony,
   apka zainstalowana na telefonie użytkownika.
@@ -162,6 +171,14 @@
   więc `getUserMedia` jest blokowane (polityka iframe + brak secure context po
   stronie apki). To ograniczenie platformy, nie bug — moduły mikrofonowe testujemy
   na `localhost:8000` u użytkownika albo na Pages (https) po scaleniu.
+- **Transpozycja — pułapki zapisu nazw (2026-09-16)**: (a) litera `B` w wejściu
+  = Bb (10), `H` = B naturalne (11) — mapa `ROOT_PC {b:11,h:11}` + znakiem
+  przy literze (`Bb` → 11−1 = 10); (b) wynik NIE może iść przez `pcDisp()`, bo
+  `PL[10]='B'` zjada A# — są osobne tabele `TRANS_OUT_*` (EN/PL × #/♭);
+  (c) preferencja „auto” trzyma się **pisowni pierwszego akordu wejścia**
+  (`Db7 …` → bemole, `C# …` → krzyżyki), inaczej przy naturalnych literach
+  decyduje kierunek przesunięcia; (d) w PL tryb bemolowy: B naturalne = `H`,
+  Bb = `B`, A# = `Ais`, F# = `Fis`/`Ges`.
 - **Arena: scalenie PR-a ZAMYKA sesję** — po merge w tym czacie nie da się dalej
   pracować ani zapisywać w repo; użytkownik zakłada nowy czat z podpiętym repo
   i pisze „przeczytaj plik instrukcja”. Wniosek: PR dopiero na końcu paczki,
@@ -190,6 +207,14 @@
   zmiana (mały diff!) → commit → push. Awaryjnie (zły commit już na remote):
   naprawić lokalnie i `git push --force-with-lease=<branch>:<SHA z ls-remote>`.
   Dlatego: **push po każdej turze ze zmianami** (remote = prawda).
+
+## Rozbieżność w HANDOFF §5.8 (do potwierdzenia przez użytkownika)
+Przykład w HANDOFF: sekwencja `C A D G` + cel `F` → „`F D G Bb` (+5)”. Reguła
+z tego samego punktu („cała sekwencja przesuwa się o +5”) daje **`F D G C`**
+(G+5 = C, nie Bb) — w przykładzie jest literówka. Zaimplementowano REGUŁĘ
+(+5 dla wszystkich akordów), a testy smoke pilnują wyniku `F D G C`.
+Jeśli użytkownik chce inne zachowanie (np. zachowanie funkcji stopni w
+tonacji) — zmienić `transpShiftToTarget`/`transpChord` i testy.
 
 ## Tuner — spec (pomysł użytkownika 2026-09-11; budowa po kroku 5)
 - Strojenie gitary przez mikrofon telefonu/tabletu; **wspólny silnik
@@ -222,6 +247,7 @@
 - [ ] 5. Mikrofon: silnik pitch + „Test mikrofonu" → „znajdź nutę" → „słuch"
 - [ ] 5b. 🎚️ Tuner do strojenia gitary (pomysł użytkownika 2026-09-11 —
   po silniku pitch z kroku 5; spec: PROGRESS „Tuner — spec”)
-- [ ] 6. Transpozycja akordów
+- [x] 6. Transpozycja akordów ✓ (2026-09-16: zakładka 🔀, parser EN/PL, opcja A/B,
+  odsłuch, kopiowanie, „pokaż na gryfie”; 159/159 testów)
 - [ ] 7. Poradnik (samouczki + teoria, uwzględnia nowe moduły)
 - [ ] 8. Testy końcowe (smoke + ręcznie z użytkownikiem, na telefonie)
