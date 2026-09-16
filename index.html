@@ -23,7 +23,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px}
-button{font-family:inherit}
+button{font-family:inherit;color:inherit}
 header{display:flex;align-items:center;gap:14px;padding:12px 18px;background:linear-gradient(180deg,#171b21,#12151a);border-bottom:1px solid var(--line);flex-wrap:wrap}
 .logo{font-size:20px;font-weight:800;letter-spacing:.3px}
 .logo span{color:var(--acc)}
@@ -32,6 +32,9 @@ nav{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
 .tab-btn{background:transparent;border:1px solid transparent;color:var(--muted);padding:8px 14px;border-radius:9px;cursor:pointer;font-size:14px;font-weight:600}
 .tab-btn:hover{color:var(--txt);background:var(--panel2)}
 .tab-btn.active{background:var(--panel2);color:var(--txt);border-color:var(--line)}
+.mute-btn{border:1px solid var(--line);background:var(--panel2);color:var(--txt);border-radius:9px;padding:8px 12px;cursor:pointer;font-size:15px;line-height:1}
+.mute-btn:hover{border-color:var(--acc)}
+.mute-btn.muted{opacity:.6;border-color:var(--bad)}
 main{max-width:1180px;margin:0 auto;padding:16px 14px 60px}
 section{display:none}
 section.active{display:block}
@@ -76,6 +79,10 @@ select:focus,button:focus{outline:2px solid var(--acc);outline-offset:1px}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
 .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--muted)}
 .legend .li{display:inline-flex;align-items:center;gap:6px}
+.hit-open:hover{background:rgba(240,168,50,.14)}
+.legend .li.clickable{cursor:pointer;border:1px solid var(--line);border-radius:7px;padding:2px 8px}
+.legend .li.clickable:hover{border-color:var(--acc)}
+.legend .li.off{opacity:.35;text-decoration:line-through}
 .sw{width:13px;height:13px;border-radius:50%;display:inline-block;border:1.5px solid rgba(255,255,255,.8)}
 .info-line{margin-top:10px;font-size:13.5px;color:var(--muted);min-height:20px}
 .info-line b{color:var(--txt)}
@@ -85,7 +92,7 @@ select:focus,button:focus{outline:2px solid var(--acc);outline-offset:1px}
 .mode-card:hover{border-color:var(--acc)}
 .mode-card.active{border-color:var(--acc);background:linear-gradient(180deg,#221d12,var(--panel))}
 .mode-card .ic{font-size:20px}
-.mode-card .t{font-weight:700;margin-top:4px}
+.mode-card .t{font-weight:700;margin-top:4px;color:var(--txt)}
 .mode-card .d{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.35}
 .mode-card .ms{font-size:11.5px;color:var(--acc);margin-top:6px;font-weight:600}
 .qbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -120,8 +127,45 @@ th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
 th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px}
 .pbar{height:8px;background:var(--panel2);border-radius:5px;overflow:hidden;min-width:80px}
 .pbar i{display:block;height:100%;background:var(--ok);border-radius:5px}
-footer{text-align:center;color:#5b6673;font-size:12px;padding:18px;line-height:1.6}
 .hint{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+/* metronom */
+.tab-btn.live{border-color:var(--acc);color:var(--acc);animation:tblink 1.2s ease-in-out infinite}
+@keyframes tblink{0%,100%{opacity:1}50%{opacity:.45}}
+.mbpm{font-size:44px;font-weight:800;color:var(--acc);line-height:1;min-width:150px}
+.mbpm small{font-size:14px;color:var(--muted);font-weight:600}
+input.num{width:74px;text-align:center;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--txt);font-size:14px}
+input.num:focus{outline:2px solid var(--acc);outline-offset:1px}
+input[type=text]{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 10px;color:var(--txt);font-size:14px}
+input[type=text]:focus{outline:2px solid var(--acc);outline-offset:1px}
+.preset{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.preset .nm{font-weight:700;font-size:14px}
+.preset .ds{font-size:12px;color:var(--muted)}
+.preset .ord{display:flex;flex-direction:column;gap:2px}
+.preset .ord button{background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:5px;font-size:10px;padding:1px 7px;cursor:pointer}
+.preset .right{margin-left:auto;display:flex;gap:6px}
+.preset.drag{opacity:.4}
+.preset .grip{cursor:grab;color:var(--muted);padding:6px 4px;user-select:none;font-size:14px;letter-spacing:1px}
+.btn.armed{border-color:var(--bad);color:#ff8a80}
+.btn.big{font-size:16px;padding:12px 28px}
+.mdots{display:flex;gap:12px;margin:16px 0 6px;flex-wrap:wrap}
+.mdot{width:38px;height:38px;border-radius:50%;background:var(--panel2);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer;user-select:none}
+.mdot.on{background:var(--acc);border-color:#fff;transform:scale(1.18);color:#151006}
+.mdot.b1{border-color:var(--acc)}
+.mdot.mut{opacity:.4;text-decoration:line-through}
+.mbar{font-size:22px;font-weight:800;min-width:60px}
+.mdot.on.bell{background:#ffd75e;border-color:#fff;color:#151006;transform:scale(1.3)}
+.modechip{border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:8px 14px;cursor:pointer;font-weight:700;font-size:13.5px;color:var(--muted)}
+.modechip.active{border-color:var(--acc);color:var(--txt)}
+.flow{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.fstep{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:12.5px;font-weight:600}
+.fstep.prep{border-color:#4d96ff;color:#bcd4ff}
+.fstep.bell{border-color:var(--acc);color:var(--acc);font-weight:800}
+.fstep.cur{outline:2px solid var(--ok);outline-offset:1px}
+.farrow{color:var(--muted);font-size:16px}
+.mphase{font-size:15px;font-weight:700;margin-top:12px;min-height:22px}
+.panel.dim{opacity:.55}
+input.num:disabled,.btn:disabled{opacity:.5}
+.btn:disabled{cursor:default}
 @media (max-width:640px){ .qtext{font-size:17px} .qtext .big{font-size:22px} .pad{grid-template-columns:repeat(4,1fr)} }
 </style>
 </head>
@@ -134,9 +178,11 @@ footer{text-align:center;color:#5b6673;font-size:12px;padding:18px;line-height:1
   <nav>
     <button class="tab-btn active" data-tab="board">🎸 Gryf</button>
     <button class="tab-btn" data-tab="train">🎯 Trening</button>
+    <button class="tab-btn" data-tab="metro">🥁 Metronom</button>
     <button class="tab-btn" data-tab="stats">📊 Statystyki</button>
     <button class="tab-btn" data-tab="settings">⚙️ Ustawienia</button>
   </nav>
+  <button class="mute-btn" id="btnMute" title="Wycisz wszystko (master-mute)" aria-label="Wycisz wszystkie dźwięki">🔊</button>
 </header>
 <main>
 
@@ -165,7 +211,7 @@ footer{text-align:center;color:#5b6673;font-size:12px;padding:18px;line-height:1
         <label class="chip" id="chkCagedWrap"><input type="checkbox" id="chkCaged"> CAGED (5 kształtów)</label>
       </div>
     </div>
-    <div class="hint">Kliknij dowolną nutę (nawet pustą), aby ją usłyszeć. Zakres progów, strojenie i nazwy ustawisz w zakładce ⚙️ Ustawienia.</div>
+    <div class="hint">Kliknij dowolne pole (nawet bez kropki) albo nazwę struny przed siodełkiem (pusta struna), aby usłyszeć dźwięk. Zakres progów, strojenie i nazwy ustawisz w zakładce ⚙️ Ustawienia.</div>
   </div>
   <div class="panel">
     <div class="board-scroll" id="boardScroll"></div>
@@ -198,6 +244,62 @@ footer{text-align:center;color:#5b6673;font-size:12px;padding:18px;line-height:1
     <div class="board-scroll" id="trainBoardScroll"></div>
     <div class="pad hide" id="pad"></div>
     <div class="typeline" id="typeLine">Wskazówka: możesz też pisać nazwę nuty na klawiaturze (np. „C”, „C#”, „Ab” albo „Cis”, „H”). <b id="typeBuf"></b></div>
+  </div>
+</section>
+
+<!-- ============ METRONOM ============ -->
+<section id="tab-metro">
+  <div class="panel">
+    <h2>Metronom — tryb zwykły</h2>
+    <div class="row">
+      <div class="mbpm" id="metroBpmDisp">80<small> BPM</small></div>
+      <button class="btn primary big" id="metroStart">▶ Start</button>
+      <div>
+        <label class="small">Tempo (BPM)</label>
+        <div class="row" style="gap:6px">
+          <button class="btn" id="metroMinus">−</button>
+          <input class="num" id="metroBpm" value="80" inputmode="numeric" autocomplete="off">
+          <button class="btn" id="metroPlus">+</button>
+        </div>
+      </div>
+      <div>
+        <label class="small">Metrum — uderzeń na takt</label>
+        <input class="num" id="metroBeats" value="4" inputmode="numeric" autocomplete="off">
+      </div>
+      <div>
+        <label class="small">Takt</label>
+        <div class="mbar" id="metroBar">—</div>
+      </div>
+    </div>
+    <div class="mdots" id="metroDots"></div>
+    <p class="hint">Klik w kropkę = <b>wyciszenie tego uderzenia</b> w taktach — np. w 7/4 możesz wyciszyć 5. uderzenie. Uderzenie 1. jest akcentowane. Metronom gra dalej po przejściu do innych zakładek (miga w nagłówku) — zatrzymasz go tutaj.</p>
+  </div>
+  <div class="panel dim" id="metroRampPanel">
+    <h2>Rampa — automatyczne podkręcanie tempa</h2>
+    <div class="row">
+      <button class="modechip active" id="metroModeSimple">Zwykły</button>
+      <button class="modechip" id="metroModeRamp">Rampa</button>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <div><label class="small">Tempo bazowe (= 100%)</label><div><input class="num" id="metroBase" value="80" inputmode="decimal" autocomplete="off"> <span style="color:var(--muted);font-size:12px">BPM</span></div></div>
+      <div><label class="small">Przyrost na krok</label><div class="row" style="gap:6px"><button class="modechip active" id="metroStepPct">%</button><button class="modechip" id="metroStepBpm">BPM</button><input class="num" id="metroStep" value="1" inputmode="decimal" autocomplete="off"></div></div>
+      <div><label class="small">Takty treningowe (n)</label><input class="num" id="metroN" value="4" inputmode="numeric" autocomplete="off"></div>
+      <div><label class="small">Takty startu (s)</label><input class="num" id="metroS" value="2" inputmode="numeric" autocomplete="off"></div>
+      <div><label class="small">Tempo maksymalne</label><div><input class="num" id="metroMax" value="120" inputmode="numeric" autocomplete="off"> <span style="color:var(--muted);font-size:12px">BPM</span></div></div>
+      <div><label class="small">Po osiągnięciu max</label><select id="metroEnd"><option value="hold">trzymaj tempo</option><option value="stop">stop + podsumowanie</option><option value="restart">restart od startu</option></select></div>
+    </div>
+    <div class="flow" id="metroFlow"></div>
+    <div class="mphase" id="metroPhase"></div>
+    <p class="hint">Rampa gra na przemian: <b>Start</b> (dzwonek) → <b>Trening</b> — oba w tym samym tempie. Każdy kolejny Start jest szybszy o przyrost (<b>liniowo od bazy</b>: 80.8, 81.6, 82.4…). Maska wyciszonych uderzeń działa przez całą rampę.</p>
+  </div>
+  <div class="panel">
+    <h2>Presety ćwiczeń</h2>
+    <div id="metroPresets"></div>
+    <div class="row" style="margin-top:10px">
+      <input type="text" id="metroPresetName" placeholder="Nazwa presetu…" maxlength="40" autocomplete="off" style="flex:1;min-width:180px">
+      <button class="btn primary" id="metroPresetSave">＋ Zapisz bieżące ustawienia</button>
+    </div>
+    <p class="hint">Kolejność zmieniasz strzałkami (góra/dół) lub przeciąganiem. Preset zapisuje: tryb, metrum, wyciszenia, tempo, przyrost, n, s, tempo max i zachowanie na limicie.</p>
   </div>
 </section>
 
@@ -306,11 +408,6 @@ footer{text-align:center;color:#5b6673;font-size:12px;padding:18px;line-height:1
   </div>
 </div>
 
-<footer>
-  FretMaster — narzędzie edukacyjne. Inspirowane: Fretboard Trainer (How to Sound Like Slash), Fretmap, Guitar Fretboard Note Trainer (Justin Guitar), Fretwiz, FretPro.<br>
-  Cała praca odbywa się lokalnie w Twojej przeglądarce — statystyki zapisuje się w localStorage.
-</footer>
-
 <script>
 'use strict';
 /* ================= DANE ================= */
@@ -390,16 +487,22 @@ const DEFAULT_SETTINGS = {
   instrument:'guitar', tuning:'standard', frets:12, lh:false,
   stringsMask:[1,1,1,1,1,1],
   trainFrets:12, trainSource:'all', trainLimit:0,
-  sound:true, showNames:true, noteLang:'en',
+  sound:true, muted:false, showNames:true, noteLang:'en',
 };
 const DEFAULT_STATS = {
   global:{q:0,c:0,bestStreak:0,sprintBest:0},
   modes:{nazwij:{q:0,c:0,bs:0}, znajdz:{q:0,c:0,bs:0}, pamiec:{q:0,c:0,bs:0}, sprint:{q:0,c:0,bs:0}},
 };
+const DEFAULT_METRO = {
+  bpm:80, beats:4, mask:[],
+  mode:'simple', base:80, stepType:'pct', step:1, n:4, s:2, maxBpm:120, endMode:'hold',
+  presets:[],
+};
 let state = {
   settings: Object.assign({}, DEFAULT_SETTINGS),
-  explorer: {key:0, scale:'major', chord:'none', show:{scale:true, chord:false, intervals:false, caged:false}},
+  explorer: {key:0, scale:'major', chord:'none', show:{scale:true, chord:false, intervals:false, caged:false}, cagedHidden:[]},
   stats: JSON.parse(JSON.stringify(DEFAULT_STATS)),
+  metro: JSON.parse(JSON.stringify(DEFAULT_METRO)),
 };
 let currentTab = 'board';
 const TrainState = {mode:'nazwij', Q:null, phase:'idle',
@@ -431,54 +534,107 @@ function loadState(){
     const d = JSON.parse(raw);
     if(d.settings) state.settings = Object.assign({}, DEFAULT_SETTINGS, d.settings);
     if(d.explorer) state.explorer = Object.assign({}, state.explorer, d.explorer);
+    if(!Array.isArray(state.explorer.cagedHidden)) state.explorer.cagedHidden=[];
     if(d.stats){
       state.stats.global = Object.assign({}, DEFAULT_STATS.global, d.stats.global||{});
       Object.keys(DEFAULT_STATS.modes).forEach(m=>{
         state.stats.modes[m] = Object.assign({}, DEFAULT_STATS.modes[m], (d.stats.modes||{})[m]||{});
       });
     }
+    if(d.metro){ state.metro = Object.assign({}, DEFAULT_METRO, d.metro); metroNormalize(); }
   }catch(e){ console.warn('loadState', e); }
 }
 function saveState(){
-  try{ localStorage.setItem('fretmaster.v1', JSON.stringify({settings:state.settings, explorer:state.explorer, stats:state.stats})); }
+  try{ localStorage.setItem('fretmaster.v1', JSON.stringify({settings:state.settings, explorer:state.explorer, stats:state.stats, metro:state.metro})); }
   catch(e){ /* tryb prywatny — pomijamy */ }
 }
 
 /* ================= AUDIO (Karplus-Strong) ================= */
-let AC=null, masterGain=null;
+let AC=null, masterGain=null, guitarBus=null;
 function audio(){
   if(!AC){
     const Ctx = window.AudioContext || window.webkitAudioContext;
     AC = new Ctx();
     masterGain = AC.createGain();
-    masterGain.gain.value = 0.55;
-    masterGain.connect(AC.destination);
+    masterGain.gain.value = 0.6;
+    const comp = AC.createDynamicsCompressor(); // klej + ochrona przed przesterem
+    comp.threshold.value=-14; comp.ratio.value=3; comp.attack.value=0.004; comp.release.value=0.18;
+    masterGain.connect(comp); comp.connect(AC.destination);
+    // „pudło” gitary: rezonans + zaokrąglenie góry (tylko struny — beepy idą wprost na master)
+    guitarBus = AC.createGain(); guitarBus.gain.value=1;
+    const body = AC.createBiquadFilter();
+    body.type='peaking'; body.frequency.value=260; body.Q.value=0.8; body.gain.value=4.5;
+    const body2 = AC.createBiquadFilter(); // drugi rezonans pudła — „drewnianość”
+    body2.type='peaking'; body2.frequency.value=430; body2.Q.value=1.1; body2.gain.value=2;
+    const presence = AC.createBiquadFilter(); // obecność góry (odbierana jako cichsza)
+    presence.type='highshelf'; presence.frequency.value=3200; presence.gain.value=2.5;
+    const top = AC.createBiquadFilter();
+    top.type='lowpass'; top.frequency.value=9500; top.Q.value=0.3;
+    guitarBus.connect(body); body.connect(body2); body2.connect(presence); presence.connect(top); top.connect(masterGain);
   }
   if(AC.state==='suspended') AC.resume();
   return AC;
 }
 document.addEventListener('pointerdown', function once(){ audio(); }, {once:true});
+/* Master-mute (nagłówek) i „Dźwięki” (ustawienia) to DWA niezależne przełączniki:
+   dźwięk słychać tylko, gdy OBA pozwalają. */
+function soundOn(){ return state.settings.sound && !state.settings.muted; }
+/* Ulepszona synteza struny (HANDOFF §5.3): poprawny Karplus-Strong z tłumieniem
+   zależnym od wysokości, wygładzona „kostka”, wczesne odbicia i fade'y.
+   Czyste funkcje (bez Web Audio), żeby dało się je testować w node. */
+function rng32(seed){ let a=seed>>>0; return function(){ a|=0; a=(a+0x6D2B79F5)|0; let t=Math.imul(a^(a>>>15),1|a); t=(t+Math.imul(t^(t>>>7),61|t))^t; return ((t^(t>>>14))>>>0)/4294967296; }; }
+function ksString(freq, sr, len, seed){
+  freq = Math.min(Math.max(freq,20), sr*0.3);
+  const rnd = rng32(seed>>>0 || 1);
+  const N = Math.max(2, Math.round(sr/freq));
+  const d = new Float32Array(len);
+  let lp = 0; // kostka: szum wygładzony — atak z ciałem, bez „szkła”
+  for(let i=0;i<N && i<len;i++){ const w=rnd()*2-1; lp += 0.5*(w-lp); d[i]=(w*0.45+lp*0.75)*0.62; }
+  const tickN = Math.min(len, Math.floor(sr*0.005)); // trzask kostki: pierwsze 5 ms, znika po ~1 ms
+  for(let i=0;i<tickN;i++){ d[i] += (rnd()*2-1)*0.22*Math.exp(-i/(sr*0.0012)); }
+  const T60 = 1.5 + 250/Math.max(40,freq); // basy wybrzmiewają dłużej (do ~7 s), góra ~1.9 s
+  const damp = Math.pow(10, -3/(T60*freq));
+  const S = 0.38; // wygładzanie pętli: atak jasny, wybrzmienie mięknie (jak tłumienie struny)
+  if(N<len) d[N]=d[0]*damp; // start od N+1, bo d[i-N-1] dla i=N to d[-1] (undefined → NaN!)
+  for(let i=N+1;i<len;i++){ d[i] = (d[i-N]*(1-S) + d[i-N-1]*S) * damp; }
+  return d;
+}
+function addEarlyRef(d, sr, delaySec, gain){ // jedno wczesne odbicie: „powietrze” + szerokość stereo
+  const D = Math.floor(sr*delaySec), src = Float32Array.from(d);
+  let lp = 0;
+  for(let i=D;i<d.length;i++){ lp += 0.25*(src[i-D]-lp); d[i]+=lp*gain; }
+}
+function applyFades(d, sr){ // mikro-fade na starcie i wygaszenie końca — brak klików
+  const fi = Math.min(d.length, Math.floor(sr*0.002));
+  for(let i=0;i<fi;i++) d[i]*=i/fi;
+  const fo = Math.min(d.length, Math.floor(sr*0.08));
+  for(let i=0;i<fo;i++) d[d.length-1-i]*=i/fo;
+}
 function pluck(freq, dur, vol){
-  if(!state.settings.sound || !freq) return;
+  if(!soundOn() || !freq) return;
   try{
     const ac = audio();
     const sr = ac.sampleRate;
-    const N = Math.max(2, Math.round(sr/freq));
-    const len = Math.floor(sr*(dur||1.5));
-    const buf = ac.createBuffer(1, len, sr);
-    const d = buf.getChannelData(0);
-    for(let i=0;i<N && i<len;i++) d[i] = Math.random()*2-1;
-    const damp = 0.996;
-    for(let i=N;i<len;i++){ d[i] = (d[i-N] + d[(i-1)%N]) * 0.5 * damp; }
+    const len = Math.max(64, Math.floor(sr*(dur||1.5)));
+    const buf = ac.createBuffer(2, len, sr); // stereo: dwa rozkorelowane głosy = „grubość”
+    const seed = (Math.random()*0xFFFFFFFF)>>>0;
+    const delays = [0.023, 0.031]; // różne odbicia L/R pogłębiają stereo
+    for(let ch=0;ch<2;ch++){
+      const d = ksString(freq, sr, len, seed+ch*1013);
+      addEarlyRef(d, sr, delays[ch], 0.10);
+      applyFades(d, sr);
+      buf.getChannelData(ch).set(d);
+    }
+    const hfComp = 1 + 0.25*Math.min(1, Math.max(0, Math.log2(freq/160)/3)); // góra cichsza w odbiorze — dopalamy do +25%
     const src = ac.createBufferSource(); src.buffer = buf;
-    const g = ac.createGain(); g.gain.value = (vol===undefined?1:vol);
-    src.connect(g); g.connect(masterGain);
+    const g = ac.createGain(); g.gain.value = (vol===undefined?1:vol)*hfComp;
+    src.connect(g); g.connect(guitarBus);
     src.start();
   }catch(e){}
 }
-function playMidi(m, vol){ pluck(midiFreq(m), 1.5, vol===undefined?0.9:vol); }
+function playMidi(m, vol){ pluck(midiFreq(m), 2.0, vol===undefined?0.9:vol); }
 function beep(ok){
-  if(!state.settings.sound) return;
+  if(!soundOn()) return;
   try{
     const ac = audio();
     const o = ac.createOscillator(), g = ac.createGain();
@@ -489,6 +645,21 @@ function beep(ok){
     o.connect(g); g.connect(masterGain);
     o.start(); o.stop(ac.currentTime+(ok?0.2:0.28));
   }catch(e){}
+}
+
+/* ================= MASTER-MUTE (przycisk w nagłówku) ================= */
+function updateMuteBtn(){
+  const b = $('btnMute'); if(!b) return;
+  const m = !!state.settings.muted;
+  b.textContent = m ? '🔇' : '🔊';
+  b.classList.toggle('muted', m);
+  b.title = m ? 'Włącz dźwięk (master-mute)' : 'Wycisz wszystko (master-mute)';
+  b.setAttribute('aria-pressed', m ? 'true' : 'false');
+}
+function setMuted(m){
+  state.settings.muted = !!m;
+  saveState();
+  updateMuteBtn();
 }
 
 /* ================= GRYF ================= */
@@ -518,6 +689,10 @@ function renderBoard(containerId, decorative){
   outer.appendChild(fb);
 
   const dispOrder = state.settings.lh ? range(S) : range(S).reverse(); // indeks struny od góry
+  const dKey = state.explorer.key; // wspólne dla nazw strun i kropek (eksplorator)
+  const dSSet = (decorative && state.explorer.show.scale) ? pcSet(SCALES[state.explorer.scale].iv) : null;
+  const dCSet = (decorative && state.explorer.show.chord && state.explorer.chord!=='none') ? pcSet(CHORDS[state.explorer.chord].iv) : null;
+  const dCaged = (decorative && state.explorer.show.caged && cagedAvailable()) ? cagedData() : null;
   dispOrder.forEach((s,i)=>{
     const y = numH + i*rowH + rowH/2;
     const ln = el('div','sline');
@@ -525,7 +700,14 @@ function renderBoard(containerId, decorative){
     outer.appendChild(ln);
     const nm = el('div','sname');
     nm.style.top=(numH+i*rowH)+'px'; nm.style.height=rowH+'px'; nm.style.width=labelW+'px';
-    nm.textContent = midiName(base[s]);
+    nm.textContent = decorative ? midiName(base[s]) : ''; // trening: nazwy ukryte (bez ściągi)
+    if(decorative){ // czy pusta struna wchodzi w skalę/akord/CAGED?
+      const opc=((base[s]%12)+12)%12, orel=((opc-dKey+12)%12);
+      if(opc===dKey) nm.style.color='#ff5252';
+      else if(dCSet && dCSet.has(orel)) nm.style.color='#4fc3f7';
+      else if(dSSet && dSSet.has(orel)) nm.style.color='#e6e6e6';
+      if(dCaged && dCaged.get(s+':0')){ const L=dCaged.get(s+':0'); nm.textContent+=' '+L.join(''); nm.style.color=CAGED_COLORS[L[0]]; }
+    }
     outer.appendChild(nm);
   });
   const nut = el('div','nut');
@@ -551,14 +733,9 @@ function renderBoard(containerId, decorative){
   /* dekoracje (tylko eksplorator) */
   let cellInfo = {};
   if(decorative){
-    const key = state.explorer.key;
-    const scaleOn = state.explorer.show.scale;
-    const chordOn = state.explorer.show.chord && state.explorer.chord!=='none';
+    const key = dKey;
     const intOn = state.explorer.show.intervals;
-    const cagOn = state.explorer.show.caged && cagedAvailable();
-    const sSet = scaleOn ? pcSet(SCALES[state.explorer.scale].iv) : null;
-    const cSet = chordOn ? pcSet(CHORDS[state.explorer.chord].iv) : null;
-    const caged = cagOn ? cagedData() : null;
+    const sSet = dSSet, cSet = dCSet, caged = dCaged;
     for(let s=0;s<S;s++){
       if(!state.settings.stringsMask[s]) continue;
       for(let f=1;f<=N;f++){
@@ -601,9 +778,15 @@ function renderBoard(containerId, decorative){
     }
   }
 
-  /* pola klikalne */
+  /* pola klikalne (puste struny: klik na strunę przed siodełkiem = próg 0) */
   for(let s=0;s<S;s++){
     const i = dispOrder.indexOf(s);
+    const oh = el('div','hit hit-open');
+    oh.dataset.s=s; oh.dataset.f=0;
+    oh.style.left='0px'; oh.style.top=(numH+i*rowH)+'px';
+    oh.style.width=labelW+'px'; oh.style.height=rowH+'px';
+    oh.title = decorative ? 'Pusta struna '+midiName(base[s])+' — kliknij, aby usłyszeć' : 'Pusta struna — kliknij';
+    outer.appendChild(oh);
     for(let f=1;f<=N;f++){
       const h = el('div','hit');
       h.dataset.s=s; h.dataset.f=f;
@@ -633,12 +816,13 @@ function cagedData(){
   const map = new Map();
   CAGED.forEach(sh=>{
     if(sh.aStr>=S) return;
+    if(state.explorer.cagedHidden.includes(sh.letter)) return;
     const aF = anchors[sh.letter];
     Object.keys(sh.notes).forEach(sIdx=>{
       const s=+sIdx; if(s>=S) return;
       sh.notes[s].forEach(n=>{
         const off=n[0], f=aF+off;
-        if(f<1||f>N) return;
+        if(f<0||f>N) return;
         const arr = map.get(s+':'+f)||[];
         if(!arr.includes(sh.letter)) arr.push(sh.letter);
         map.set(s+':'+f,arr);
@@ -661,7 +845,8 @@ function addTrainerDot(s,f,cls,text){
   const d = el('div','dot '+cls);
   d.dataset.s=s; d.dataset.f=f;
   d.style.width=d.style.height=(dotR*2)+'px';
-  d.style.left=(GEO.labelW+(f-0.5)*GEO.cellW-dotR)+'px';
+  const cx = f===0 ? GEO.labelW-dotR-3 : GEO.labelW+(f-0.5)*GEO.cellW;
+  d.style.left=(cx-dotR)+'px';
   d.style.top=(GEO.numH+i*GEO.rowH+GEO.rowH/2-dotR)+'px';
   d.style.fontSize=Math.max(9,dotR*0.8)+'px';
   if(text) d.textContent=text;
@@ -698,6 +883,7 @@ function buildLegend(){
     const d = el('span','li');
     d.innerHTML = `<span class="sw" style="background:${color}"></span> ${label}`;
     lg.appendChild(d);
+    return d;
   };
   const key = state.explorer.key;
   if(state.explorer.show.scale){
@@ -709,7 +895,14 @@ function buildLegend(){
   if(state.explorer.show.chord && state.explorer.chord!=='none') li('#4fc3f7','dźwięk akordu');
   li('#ff5252','tonika: '+pcDisp(key));
   if(state.explorer.show.caged){
-    if(cagedAvailable()) Object.keys(CAGED_COLORS).forEach(l=> li(CAGED_COLORS[l],'kształt '+l));
+    if(cagedAvailable()) Object.keys(CAGED_COLORS).forEach(l=>{
+      const hid = state.explorer.cagedHidden.includes(l);
+      const it = li(CAGED_COLORS[l],'kształt '+l);
+      it.classList.add('clickable'); if(hid) it.classList.add('off');
+      it.dataset.letter=l;
+      it.title = hid ? 'Kształt '+l+' ukryty — kliknij, aby pokazać' : 'Kształt '+l+' — kliknij, aby ukryć';
+      it.onclick = ()=>{ const h=state.explorer.cagedHidden, ix=h.indexOf(l); if(ix>=0) h.splice(ix,1); else h.push(l); saveState(); refreshBoard(); };
+    });
     else li('#888','CAGED: tylko gitara + strojenie Standard / Drop D / Eb');
   }
 }
@@ -730,7 +923,7 @@ $('boardScroll').addEventListener('click', e=>{
   const sSet = pcSet(SCALES[state.explorer.scale].iv);
   if(pc===key) extra=' · tonika';
   else if(sSet.has(rel)) extra=` · interwał ${IV_LABELS[rel]} do ${pcDisp(key)}`;
-  $('boardInfo').innerHTML = `<b>${midiName(midi)}</b> (w zapisie: <b>${pcDisp(pc)}</b>) — struna MIDI ${midi} · próg ${f}${extra}`;
+  $('boardInfo').innerHTML = `<b>${midiName(midi)}</b> (w zapisie: <b>${pcDisp(pc)}</b>) — struna MIDI ${midi} · ${f===0?'próg 0 (pusta struna)':'próg '+f}${extra}`;
 });
 
 /* ================= TRENING ================= */
@@ -773,7 +966,7 @@ function allowedCells(pc){
   const fMax = trainFretMax();
   for(let s=0;s<GEO.S;s++){
     if(!state.settings.stringsMask[s]) continue;
-    for(let f=1;f<=fMax;f++){
+    for(let f=0;f<=fMax;f++){
       if(cellPc(s,f)===pc) out.push({s,f});
     }
   }
@@ -807,7 +1000,7 @@ function startQuestion(){
   if(!cells.length){ // np. zbyt wąski zakres — poszerz
     const all = [];
     const fMax = trainFretMax();
-    for(let s=0;s<GEO.S;s++){ if(!state.settings.stringsMask[s]) continue; for(let f=1;f<=fMax;f++) all.push({s,f}); }
+    for(let s=0;s<GEO.S;s++){ if(!state.settings.stringsMask[s]) continue; for(let f=0;f<=fMax;f++) all.push({s,f}); }
     if(!all.length) return;
     const c2 = pick(all);
     return startQuestionAt(c2.s,c2.f);
@@ -957,7 +1150,7 @@ function renderTrainerView(){
   const strNames = range(GEO?GEO.S:6).filter(s=>state.settings.stringsMask[s]).map(s=>PC_RAW[((GEO.base[s]%12)+12)%12]);
   if(T.phase==='idle' || !Q){
     qT.innerHTML = `Gotowe? Tryb: <span class="big">${MODES[T.mode].label}</span>`;
-    qS.textContent = `Zakres: progi 1–${fMax} · struny: ${strNames.join(' ')} · źródło: ${srcLabel}${modeLimit()?` · limit ${modeLimit()} s`:''}`;
+    qS.textContent = `Zakres: progi 0–${fMax} · struny: ${strNames.join(' ')} · źródło: ${srcLabel}${modeLimit()?` · limit ${modeLimit()} s`:''}`;
     clearTrainerDots();
     $('pad').classList.add('hide');
     $('startBtn').textContent='▶ Start';
@@ -975,7 +1168,7 @@ function renderTrainerView(){
       $('pad').classList.toggle('hide', !(T.phase==='question'));
     } else {
       qT.innerHTML = (T.mode==='sprint'?'Sprint: ':'Znajdź: ') + `<span class="big">${pcDisp(Q.pc)}</span>`;
-      qS.textContent = 'Kliknij wszystkie właściwe miejsca? Nie — wystarczy jedno trafienie. Kliknij nutę na gryfeu, która nosi tę nazwę.';
+      qS.textContent = 'Kliknij wszystkie właściwe miejsca? Nie — wystarczy jedno trafienie. Kliknij nutę na gryfie, która nosi tę nazwę.';
       qP.style.display='inline-block';
       qP.onclick = ()=> playMidi(cellMidi(Q.s,Q.f), 0.8);
       if(T.phase==='question') { /* brak kropki — to jest pytanie */ }
@@ -1110,6 +1303,7 @@ function bindSettings(){
   $('selChord').onchange = e=>{ state.explorer.chord=e.target.value; saveState(); refreshBoard(); };
   const bindChk = (id, key)=>{ $(id).onchange = e=>{ state.explorer.show[key]=e.target.checked; saveState(); refreshBoard(); }; };
   bindChk('chkScale','scale'); bindChk('chkChord','chord'); bindChk('chkIntervals','intervals'); bindChk('chkCaged','caged');
+  $('btnMute').onclick = ()=> setMuted(!state.settings.muted);
   window.addEventListener('resize', ()=>{ if(currentTab==='board'||currentTab==='train') refreshBoard(); });
 }
 function syncExplorerChecks(){
@@ -1123,6 +1317,322 @@ function syncExplorerChecks(){
   } else { $('chkCagedWrap').style.opacity=1; $('chkCaged').disabled=false; }
 }
 
+/* ================= METRONOM ================= */
+const Metro = {playing:false, beat:0, bar:1, nextTime:0, timer:null, phase:'start', phaseBar:0, kTrain:0, rTempo:80};
+function metroNormalize(){
+  const m = state.metro;
+  m.bpm = Math.min(300, Math.max(20, Math.round(+m.bpm)||80));
+  m.beats = Math.min(16, Math.max(2, Math.round(+m.beats)||4));
+  if(!Array.isArray(m.mask)) m.mask=[];
+  while(m.mask.length<m.beats) m.mask.push(false);
+  m.mask.length = m.beats;
+  m.base = Math.min(300, Math.max(20, Math.round(+m.base)||80));
+  m.maxBpm = Math.min(300, Math.max(20, Math.round(+m.maxBpm)||120));
+  if(m.maxBpm<m.base) m.maxBpm=m.base;
+  m.step = Math.min(100, Math.max(0.1, +m.step||1));
+  if(m.stepType!=='bpm') m.stepType='pct';
+  m.n = Math.min(16, Math.max(1, Math.round(+m.n)||4));
+  m.s = Math.min(16, Math.max(1, Math.round(+m.s)||2));
+  if(m.mode!=='rampa') m.mode='simple';
+  if(!['hold','stop','restart'].includes(m.endMode)) m.endMode='hold';
+  if(!Array.isArray(m.presets)) m.presets=[];
+}
+function metroMuted(i){ return !!state.metro.mask[i]; }
+function metroFmtT(t){ return String(Math.round(t*10)/10); }
+function metroRampTempo(base, stepType, step, k){
+  const t = stepType==='bpm' ? base + step*k : base*(1 + step*k/100);
+  return Math.round(t*10)/10;
+}
+/* Czysta maszynka faz rampy (testy w node, bez audio/timerów).
+   Wejście na granicy taktu — wyjście: następna faza + tempo. */
+function metroRampNext(s){
+  // s={phase:'start'|'train',phaseBar,k,n,st,base,stepType,step,max,end}
+  const T = kk => metroRampTempo(s.base, s.stepType, s.step, kk);
+  if(s.phase==='start'){
+    if(s.phaseBar < s.st-1) return {phase:'start', phaseBar:s.phaseBar+1, kTrain:s.k, tempo:T(s.k), stop:false};
+    return {phase:'train', phaseBar:0, kTrain:s.k, tempo:T(s.k), stop:false}; // trening w tym samym tempie co start
+  }
+  if(s.phaseBar < s.n-1) return {phase:'train', phaseBar:s.phaseBar+1, kTrain:s.k, tempo:T(s.k), stop:false};
+  const raw = T(s.k+1);
+  if(raw > s.max && s.end==='stop') return {phase:'train', phaseBar:s.phaseBar, kTrain:s.k, tempo:T(s.k), stop:true};
+  const restart = raw > s.max && s.end==='restart';
+  return {phase:'start', phaseBar:0, kTrain: restart?0:s.k+1, tempo: restart?s.base:(raw>s.max?s.max:raw), stop:false};
+}
+function metroTabBtn(){
+  const bs = document.querySelectorAll('.tab-btn');
+  for(let i=0;i<bs.length;i++) if(bs[i].dataset && bs[i].dataset.tab==='metro') return bs[i];
+  return null;
+}
+function metroClick(accent, t){
+  try{
+    const ac = AC || audio();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type='sine';
+    o.frequency.value = accent?1900:1350;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(accent?0.5:0.32, t+0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001, t+0.055);
+    o.connect(g); g.connect(masterGain);
+    o.start(t); o.stop(t+0.07);
+  }catch(e){}
+}
+function metroBell(accent, t){ // jasny dzwonek: podstawa + oktawa, długie wybrzmienie
+  try{
+    const ac = AC || audio();
+    [[1318,accent?0.32:0.25],[2637,accent?0.12:0.09]].forEach(([fr,v])=>{
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type='sine'; o.frequency.value=fr;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(v, t+0.003);
+      g.gain.exponentialRampToValueAtTime(0.0001, t+0.35);
+      o.connect(g); g.connect(masterGain);
+      o.start(t); o.stop(t+0.4);
+    });
+  }catch(e){}
+}
+function metroTick(){
+  if(!Metro.playing || !AC) return;
+  if(Metro.nextTime < AC.currentTime - 0.25) Metro.nextTime = AC.currentTime + 0.05; // resync po uśpieniu karty
+  if(Metro.beat>=state.metro.beats){ Metro.beat=0; Metro.bar++; metroOnBar(); if(!Metro.playing) return; }
+  const rampa = state.metro.mode==='rampa';
+  const tempo = rampa ? Metro.rTempo : state.metro.bpm;
+  while(Metro.nextTime < AC.currentTime + 0.15){
+    const bi = Metro.beat, t = Metro.nextTime;
+    if(!metroMuted(bi) && soundOn()){
+      if(rampa && Metro.phase==='start') metroBell(bi===0, t);
+      else metroClick(bi===0, t);
+    }
+    const ph = rampa?Metro.phase:'train';
+    const delay = Math.max(0, (t-AC.currentTime)*1000);
+    setTimeout(((b,p)=>()=>{ if(Metro.playing) metroFlash(b,p); })(bi,ph), delay);
+    Metro.nextTime += 60/tempo;
+    Metro.beat++;
+    if(Metro.beat>=state.metro.beats){ Metro.beat=0; Metro.bar++; metroOnBar(); if(!Metro.playing) return; }
+  }
+}
+function metroOnBar(){
+  if(state.metro.mode!=='rampa') return;
+  const m=state.metro;
+  const r=metroRampNext({phase:Metro.phase, phaseBar:Metro.phaseBar, k:Metro.kTrain, n:m.n, st:m.s, base:m.base, stepType:m.stepType, step:m.step, max:m.maxBpm, end:m.endMode});
+  if(r.stop){ metroStop(); $('metroPhase').textContent='🏁 Osiągnięto '+metroFmtT(m.maxBpm)+' BPM — koniec rampy.'; return; }
+  Metro.phase=r.phase; Metro.phaseBar=r.phaseBar; Metro.kTrain=r.kTrain; Metro.rTempo=r.tempo;
+  buildMetroFlow(); refreshMetroLive();
+}
+function refreshMetroLive(){
+  const m=state.metro;
+  if(m.mode==='rampa'){
+    const pct=Math.round(Metro.rTempo/m.base*100);
+    $('metroBpmDisp').innerHTML=metroFmtT(Metro.rTempo)+'<small> BPM · '+pct+'%</small>';
+    $('metroPhase').textContent = Metro.playing? metroPhaseLabel() : 'Rampa gotowa: '+metroFmtT(m.base)+' → '+metroFmtT(m.maxBpm)+' BPM.';
+  } else {
+    $('metroBpmDisp').innerHTML=m.bpm+'<small> BPM</small>';
+  }
+}
+function metroPhaseLabel(){
+  const m=state.metro, t=metroFmtT(Metro.rTempo);
+  if(Metro.phase==='train') return '🎯 Trening @ '+t+' (takt '+(Metro.phaseBar+1)+'/'+m.n+')';
+  return '🔔 Start @ '+t+' (takt '+(Metro.phaseBar+1)+'/'+m.s+')';
+}
+function metroStart(){
+  if(typeof window==='undefined' || (!window.AudioContext && !window.webkitAudioContext)) return false;
+  const ac = audio();
+  Metro.playing=true; Metro.beat=0; Metro.bar=1;
+  Metro.phase='start'; Metro.phaseBar=0; Metro.kTrain=0;
+  Metro.rTempo = state.metro.mode==='rampa' ? metroRampTempo(state.metro.base, state.metro.stepType, state.metro.step, 0) : state.metro.bpm;
+  Metro.nextTime=ac.currentTime+0.08;
+  if(Metro.timer) clearInterval(Metro.timer);
+  Metro.timer=setInterval(metroTick,25);
+  metroFlash(-1); metroBarUI(); buildMetroFlow(); refreshMetroLive();
+  $('metroStart').textContent='⏹ Stop';
+  const tb=metroTabBtn(); if(tb) tb.classList.add('live');
+  return true;
+}
+function metroStop(){
+  Metro.playing=false;
+  if(Metro.timer){ clearInterval(Metro.timer); Metro.timer=null; }
+  metroFlash(-1);
+  $('metroBar').textContent='—';
+  $('metroStart').textContent='▶ Start';
+  const tb=metroTabBtn(); if(tb) tb.classList.remove('live');
+}
+function metroFlash(i, phase){
+  const w=$('metroDots'); if(!w) return;
+  const ph=phase||'train';
+  for(let k=0;k<w.children.length;k++){
+    const c=w.children[k];
+    c.classList.toggle('on', k===i);
+    c.classList.toggle('bell', k===i && ph==='start');
+  }
+  metroBarUI();
+}
+function metroBarUI(){ const b=$('metroBar'); if(b) b.textContent = Metro.playing? String(Metro.bar) : '—'; }
+function buildMetroDots(){
+  const w=$('metroDots'); if(!w) return;
+  w.innerHTML='';
+  for(let i=0;i<state.metro.beats;i++){
+    const d=el('div','mdot'+(i===0?' b1':'')+(metroMuted(i)?' mut':''));
+    d.textContent=i+1;
+    d.title = metroMuted(i) ? 'Uderzenie '+(i+1)+' wyciszone — kliknij, aby włączyć' : 'Uderzenie '+(i+1)+' — kliknij, aby wyciszyć';
+    d.onclick=(()=>{ const ix=i; return ()=>{ state.metro.mask[ix]=!state.metro.mask[ix]; saveState(); buildMetroDots(); }; })();
+    w.appendChild(d);
+  }
+}
+function buildMetroFlow(){
+  const w=$('metroFlow'); if(!w) return;
+  const m=state.metro;
+  const live = Metro.playing && m.mode==='rampa';
+  let k = live ? Metro.kTrain : 0;
+  if(k<0) k=0;
+  const T0=metroRampTempo(m.base,m.stepType,m.step,k);
+  let T1=metroRampTempo(m.base,m.stepType,m.step,k+1);
+  if(T1>m.maxBpm) T1 = m.endMode==='restart'? m.base : m.maxBpm;
+  w.innerHTML='';
+  const step=(txt,cls,cur)=>{ const d=el('div','fstep'+(cls?' '+cls:'')+(cur?' cur':'')); d.textContent=txt; w.appendChild(d); };
+  const arrow=()=>{ const a=el('span','farrow'); a.textContent='→'; w.appendChild(a); };
+  step('🔔 Start ×'+m.s+' @ '+metroFmtT(T0), 'bell', live&&Metro.phase==='start');
+  arrow();
+  step('🎯 Trening ×'+m.n+' @ '+metroFmtT(T0), '', live&&Metro.phase==='train');
+  arrow();
+  step('🔔 Start ×'+m.s+' @ '+metroFmtT(T1), 'bell', false);
+  arrow();
+  step('🎯 Trening ×'+m.n+' @ '+metroFmtT(T1), '', false);
+  arrow();
+  step('… aż do '+metroFmtT(m.maxBpm), '', false);
+}
+function buildMetroUI(){
+  metroNormalize();
+  const m=state.metro, rampa = m.mode==='rampa';
+  $('metroBpm').value=m.bpm;
+  $('metroBpm').disabled=rampa;
+  $('metroMinus').disabled=rampa;
+  $('metroPlus').disabled=rampa;
+  $('metroBpm').title = rampa?'W rampie tempo liczy się z bazy (panel niżej)':'Tempo metronomu';
+  $('metroBeats').value=m.beats;
+  $('metroStart').textContent = Metro.playing?'⏹ Stop':'▶ Start';
+  $('metroModeSimple').classList.toggle('active', !rampa);
+  $('metroModeRamp').classList.toggle('active', rampa);
+  $('metroRampPanel').classList.toggle('dim', !rampa);
+  $('metroBase').value=m.base;
+  $('metroStepPct').classList.toggle('active', m.stepType==='pct');
+  $('metroStepBpm').classList.toggle('active', m.stepType==='bpm');
+  $('metroStep').value=m.step;
+  $('metroN').value=m.n;
+  $('metroS').value=m.s;
+  $('metroMax').value=m.maxBpm;
+  $('metroEnd').value=m.endMode;
+  buildMetroDots();
+  buildMetroFlow();
+  buildMetroPresets();
+  refreshMetroLive();
+  metroBarUI();
+}
+function metroPresetDesc(p){
+  const mutes=[];
+  (p.mask||[]).forEach((mm,i)=>{ if(mm) mutes.push(i+1); });
+  const muteTxt = mutes.length? ' · wyciszone: '+mutes.join(', ') : '';
+  if(p.mode==='rampa'){
+    const st = p.stepType==='bpm' ? '+'+p.step+' BPM' : '+'+p.step+'%';
+    return 'rampa '+p.base+'→'+p.max+' · '+st+' · '+p.beats+'/4 · start ×'+p.s+', trening ×'+p.n+muteTxt;
+  }
+  return 'zwykły · '+p.bpm+' BPM · '+p.beats+'/4'+muteTxt;
+}
+function metroSavePreset(){
+  const inp=$('metroPresetName');
+  const name=(inp.value||'').trim().slice(0,40);
+  if(!name) return false;
+  const m=state.metro;
+  m.presets.push({name, mode:m.mode, bpm:m.bpm, base:m.base, beats:m.beats, mask:m.mask.slice(), stepType:m.stepType, step:m.step, n:m.n, s:m.s, max:m.maxBpm, end:m.endMode});
+  inp.value='';
+  saveState(); buildMetroPresets();
+  return true;
+}
+function metroLoadPreset(i){
+  const p=state.metro.presets[i]; if(!p) return;
+  if(Metro.playing) metroStop();
+  const m=state.metro;
+  m.mode=p.mode; m.bpm=p.bpm; m.base=p.base; m.beats=p.beats; m.mask=(p.mask||[]).slice();
+  m.stepType=p.stepType; m.step=p.step; m.n=p.n; m.s=(p.s!==undefined?p.s:2); m.maxBpm=p.max; m.endMode=p.end;
+  metroNormalize(); saveState(); buildMetroUI();
+}
+function metroDeletePreset(i, btn){
+  if(!btn.classList.contains('armed')){
+    btn.classList.add('armed'); btn.textContent='pewny?';
+    setTimeout(()=>{ btn.classList.remove('armed'); if(btn.isConnected) btn.textContent='🗑'; }, 5000);
+    return;
+  }
+  state.metro.presets.splice(i,1);
+  saveState(); buildMetroPresets();
+}
+function metroMovePreset(i, dir){
+  const a=state.metro.presets, j=i+dir;
+  if(j<0||j>=a.length) return;
+  const t=a[i]; a[i]=a[j]; a[j]=t;
+  saveState(); buildMetroPresets();
+}
+function buildMetroPresets(){
+  const w=$('metroPresets'); if(!w) return;
+  w.innerHTML='';
+  const a=state.metro.presets;
+  if(!a.length){ const d=el('div','hint'); d.textContent='Brak presetów — ustaw metronom i zapisz pierwszy.'; w.appendChild(d); return; }
+  a.forEach((p,i)=>{
+    const row=el('div','preset');
+    row.dataset.idx=i;
+    const grip=el('span','grip'); grip.textContent='\u22EE\u22EE'; grip.title='Przeciągnij, aby zmienić kolejność';
+    grip.draggable=true;
+    grip.ondragstart=e=>{ try{ e.dataTransfer.setData('text/plain', String(i)); }catch(err){} row.classList.add('drag'); };
+    grip.ondragend=()=>row.classList.remove('drag');
+    const ord=el('div','ord');
+    const up=el('button',''); up.textContent='↑'; up.title='W górę'; up.dataset.act='up'; up.dataset.idx=i;
+    up.onclick=()=>metroMovePreset(i,-1);
+    const dn=el('button',''); dn.textContent='↓'; dn.title='W dół'; dn.dataset.act='down'; dn.dataset.idx=i;
+    dn.onclick=()=>metroMovePreset(i,1);
+    ord.appendChild(up); ord.appendChild(dn);
+    const mid=el('div',''); const nm=el('div','nm'); nm.textContent=p.name;
+    const ds=el('div','ds'); ds.textContent=metroPresetDesc(p);
+    mid.appendChild(nm); mid.appendChild(ds);
+    const right=el('div','right');
+    const ld=el('button','btn'); ld.textContent='Załaduj'; ld.dataset.act='load'; ld.dataset.idx=i;
+    ld.onclick=()=>metroLoadPreset(i);
+    const del=el('button','btn'); del.textContent='🗑'; del.title='Usuń preset'; del.dataset.act='del'; del.dataset.idx=i;
+    del.onclick=()=>metroDeletePreset(i, del);
+    right.appendChild(ld); right.appendChild(del);
+    row.appendChild(grip); row.appendChild(ord); row.appendChild(mid); row.appendChild(right);
+    row.ondragover=e=>{ e.preventDefault(); };
+    row.ondrop=e=>{
+      e.preventDefault();
+      let from=-1; try{ from=parseInt(e.dataTransfer.getData('text/plain'),10); }catch(err){}
+      if(isNaN(from)||from===i) return;
+      const it=a.splice(from,1)[0]; a.splice(i,0,it);
+      saveState(); buildMetroPresets();
+    };
+    w.appendChild(row);
+  });
+}
+function bindMetro(){
+  $('metroStart').onclick=()=>{ Metro.playing?metroStop():metroStart(); };
+  $('metroPresetSave').onclick=()=>metroSavePreset();
+  const setBpm=v=>{ v=Math.min(300,Math.max(20,Math.round(+v)||state.metro.bpm)); state.metro.bpm=v; saveState(); buildMetroUI(); };
+  $('metroBpm').onchange=e=>setBpm(e.target.value);
+  $('metroMinus').onclick=()=>setBpm(state.metro.bpm-1);
+  $('metroPlus').onclick=()=>setBpm(state.metro.bpm+1);
+  $('metroBeats').onchange=e=>{
+    const v=Math.min(16,Math.max(2,Math.round(+e.target.value)||state.metro.beats));
+    state.metro.beats=v; metroNormalize(); saveState(); buildMetroUI();
+  };
+  const setMode=md=>{ if(Metro.playing) metroStop(); state.metro.mode=md; saveState(); buildMetroUI(); };
+  $('metroModeSimple').onclick=()=>setMode('simple');
+  $('metroModeRamp').onclick=()=>setMode('rampa');
+  $('metroStepPct').onclick=()=>{ state.metro.stepType='pct'; saveState(); buildMetroUI(); };
+  $('metroStepBpm').onclick=()=>{ state.metro.stepType='bpm'; saveState(); buildMetroUI(); };
+  const num=(id,fn)=>{ $(id).onchange=e=>{ fn(+e.target.value); metroNormalize(); saveState(); buildMetroUI(); }; };
+  num('metroBase', v=>{ state.metro.base=v; });
+  num('metroStep', v=>{ state.metro.step=v; });
+  num('metroN', v=>{ state.metro.n=v; });
+  num('metroS', v=>{ state.metro.s=v; });
+  num('metroMax', v=>{ state.metro.maxBpm=v; });
+  $('metroEnd').onchange=e=>{ state.metro.endMode=e.target.value; saveState(); buildMetroUI(); };
+}
+
 /* ================= ZAKŁADKI ================= */
 document.querySelectorAll('.tab-btn').forEach(b=>{
   b.onclick = ()=>{
@@ -1131,6 +1641,7 @@ document.querySelectorAll('.tab-btn').forEach(b=>{
     document.querySelectorAll('main section').forEach(s=>s.classList.toggle('active', s.id==='tab-'+currentTab));
     if(currentTab==='board'){ syncExplorerChecks(); refreshBoard(); }
     if(currentTab==='train'){ renderTrainerBoard(); buildModeRow(); renderTrainerView(); }
+    if(currentTab==='metro'){ buildMetroUI(); }
     if(currentTab==='stats'){ renderStats(); }
     if(currentTab==='settings'){ buildSettings(); }
   };
@@ -1150,6 +1661,9 @@ buildKeyRow();
 buildSelects();
 buildPad();
 bindSettings();
+bindMetro();
+buildMetroUI();
+updateMuteBtn();
 syncExplorerChecks();
 buildModeRow();
 renderBoard('boardScroll', true);

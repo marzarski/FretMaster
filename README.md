@@ -19,12 +19,15 @@ tablecie i komputerze (Android/Chrome: przycisk „Zainstaluj”; iPhone/Safari:
 - ikony generuje `tools/make-icons.sh` (ImageMagick, paleta zgodna z `:root` w `index.html`).
 
 ## 🎸 Gryf (eksplorator)
-- Interaktywny gryf: kliknij dowolną nutę → usłyszysz ją (syntez „struny" Karplus-Strong) i zobaczysz nazwę + interwał,
+- Interaktywny gryf: kliknij dowolną nutę → usłyszysz ją (ulepszona synteza struny: Karplus-Strong + rezonans pudła, stereo) i zobaczysz nazwę + interwał,
 - Podświetlanie: **skala** (9 trybów: dur, minory, pentatoniki, blues, miksolidia, doria), **akord/arpeggio** (15 rodzajów), **interwały** (kolor wg stopnia), **CAGED — 5 kształtów** w dowolnym tonie (weryfikowane matematycznie),
 - Strojenia: Standard, Drop D, Eb, DADGAD, Open G/D/E,
 - Gitara (6 strun, 12/15/22 progi) i **bas** (4 struny, 12/15/20 progów),
 - Orientacja praworęczna / leworęczna (LH/RH), wyłączanie strun,
 - Nazwy nut: międzynarodowe (C, C#, D…) lub polskie/niemieckie (C, Cis, D, Des, H, B).
+- Puste struny: kliknij nazwę struny przed siodełkiem (próg 0) — działa w eksploratorze i w treningu.
+- Legenda CAGED jest klikalna — klik w kształt pokazuje go lub ukrywa na gryfie.
+- Przycisk 🔊/🔇 w nagłówku wycisza całą apkę jednym kliknięciem (master-mute, zapamiętywany).
 
 ## 🎯 Trening (4 tryby)
 | Tryb | Zasady |
@@ -36,10 +39,17 @@ tablecie i komputerze (Android/Chrome: przycisk „Zainstaluj”; iPhone/Safari:
 
 Opcje treningu: zakres progów (1–12/1–15/wszystkie), źródło nut (wszystkie / tylko skala / tylko akord),
 limit czasu na pytanie, dźwięki włącz/wyłącz.
+Nazwy strun są w treningu ukryte (bez ściągi); puste struny klikalne jak zwykle (próg 0).
+
+## 🥁 Metronom (tryb zwykły)
+- Tempo 20–300 BPM, metrum do wpisania (2–16 uderzeń na takt), kropki = uderzenia (1. akcentowane),
+- klik w kropkę wycisza uderzenie (maska zapisywana); metronom gra dalej po zmianie zakładki (miga w nagłówku).
+- Rampa: Start (s taktów, dzwonek) → Trening (n taktów) w tym samym tempie; każdy Start szybszy o przyrost liniowo od bazy; max (trzymaj/stop/restart); wizualizacja.
+- Presety: zapis pod nazwą, wczytywanie, usuwanie (2 kliki), kolejność (strzałki/przeciąganie).
 
 ## 📊 Statystyki
 Trafność i rekordy serii per tryb, rekord sprintu, czas sesji — zapisywane lokalnie (localStorage).
 
 ## 🧪 Testy
-- `node smoke-test.js` — 29 testów smoke (init, CAGED, trening, sprint, ustawienia, persystencja),
+- `node smoke-test.js` — 109 testów smoke (init, CAGED + legenda, trening, sprint, eksplorator, puste struny, ustawienia, master-mute, synteza, metronom + rampa + presety, persystencja),
 - poprawność kształtów CAGED weryfikowana: 2340 kombinacji (12 tonów × 5 kształtów × 3 długości gryfu) — 0 błędów.

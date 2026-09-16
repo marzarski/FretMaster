@@ -1,3 +1,18 @@
+# STATUS 2026-09-11 (czytaj najpierw!)
+
+> Sesja-paczka z 2026-09-11 kończy się scaleniem **PR #2** („Paczka zmian”):
+> mute, dźwięk v2, puste struny, CAGED-legenda, metronom kompletny
+> (109/109 testów, wszystko zaakceptowane na żywo).
+> **Najpierw SPRAWDŹ, czy PR #2 jest scalony** (main zawiera paczkę v2?).
+> Jeśli tak — stan to **v1 + paczka v2 na main**, Pages działa — i od razu:
+> wczytaj `PROGRESS.md` (sekcja „NASTĘPNY CZAT”) i ruszaj z krokiem **5.
+> Mikrofon**. Procedura startowa z §2 (zakładanie repo) jest NIEAKTUALNA
+> (repo `FretMaster` istnieje, publiczne, Pages działa). Specyfikacje §5
+> i plan §6 nadal aktualne, z wyjątkami w PROGRESS (rampa v2:
+> START→TRENING; nowy krok 5b: Tuner).
+
+---
+
 # HANDOFF — FretMaster: przeniesienie projektu do nowego czatu
 
 > Ten dokument jest **pełnym podsumowaniem** wcześniejszej rozmowy (projekt prowadzony od 2026-09-10)
